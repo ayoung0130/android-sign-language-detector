@@ -196,8 +196,9 @@ class HandLandmarkerHelper(
                 val x = point.x()
                 val y = point.y()
                 val z = point.z()
+                val visibility = point.visibility()
                 // 좌표를 사용하여 필요한 작업 수행
-                Log.d("Landmark", "x: $x, y: $y, z: $z")
+                Log.d("Landmark", "x: $x, y: $y, z: $z, visibility: $visibility")
             }
         }
 
@@ -227,7 +228,7 @@ class HandLandmarkerHelper(
         const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
-        const val DEFAULT_NUM_HANDS = 1
+        const val DEFAULT_NUM_HANDS = 2
         const val OTHER_ERROR = 0
         const val GPU_ERROR = 1
     }

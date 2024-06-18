@@ -5,13 +5,24 @@ import android.graphics.Bitmap
 import android.graphics.ImageFormat
 import android.media.ImageReader
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
+import androidx.camera.core.CameraSelector
+import androidx.camera.core.Preview
+import androidx.camera.lifecycle.ProcessCameraProvider
+import androidx.core.content.ContextCompat
+import androidx.navigation.Navigation
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.sign_language_detector.databinding.ActivityMainBinding
+import com.example.sign_language_detector.fragment.PermissionsFragment
+import com.google.mediapipe.framework.MediaPipeException
 import com.google.mediapipe.framework.image.MPImage
+import com.google.mediapipe.tasks.core.BaseOptions
+import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.ImageProcessingOptions
+import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import org.tensorflow.lite.Interpreter
@@ -20,113 +31,111 @@ import java.io.IOException
 import java.nio.ByteBuffer
 import java.nio.MappedByteBuffer
 import java.nio.channels.FileChannel
+import java.util.concurrent.ExecutorService
+import java.util.concurrent.Executors
+import java.util.concurrent.TimeUnit
 
-class MainActivity : AppCompatActivity() {
+class MainActivity : AppCompatActivity(), HandLandmarkerHelper.LandmarkerListener {
+
     private lateinit var activityMainBinding: ActivityMainBinding
-    private val viewModel : MainViewModel by viewModels()
-
-    private lateinit var tflite: Interpreter
+    private val viewModel: MainViewModel by viewModels()
+    private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var handLandmarker: HandLandmarker
+    private lateinit var backgroundExecutor: ExecutorService
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         activityMainBinding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(R.layout.activity_main)
+        setContentView(activityMainBinding.root)
 
-        val navHostFragment =
-            supportFragmentManager.findFragmentById(R.id.fragment_container) as NavHostFragment
-        val navController = navHostFragment.navController
-        activityMainBinding.navigation.setupWithNavController(navController)
-        activityMainBinding.navigation.setOnNavigationItemReselectedListener {
-            // ignore the reselection
-        }
+        // 백그라운드 실행기를 초기화
+        backgroundExecutor = Executors.newSingleThreadExecutor()
 
-        // Initialize TFLite Interpreter
         try {
-            tflite = Interpreter(loadModelFile())
-        } catch (e: IOException) {
+            val baseOptions = BaseOptions.builder()
+                .setModelAssetPath("sign_language_detect_model.tflite")
+                .setDelegate(Delegate.CPU)
+                .build()
+            val handLandmarkerOptions = HandLandmarker.HandLandmarkerOptions.builder()
+                .setBaseOptions(baseOptions)
+                .setNumHands(2)
+                .build()
+            handLandmarker = HandLandmarker.createFromOptions(this, handLandmarkerOptions)
+        } catch (e: MediaPipeException) {
             e.printStackTrace()
+            Log.e("MainActivity", "MediaPipe HandLandmarker initialization failed", e)
         }
 
-        // Initialize MediaPipe HandLandmarker
-        val handLandmarkerOptions = HandLandmarker.HandLandmarkerOptions.builder()
-            .setNumHands(1)
-            .build()
-        handLandmarker = HandLandmarker.createFromOptions(this, handLandmarkerOptions)
+        try {
+            handLandmarkerHelper = HandLandmarkerHelper(
+                context = this,
+                handLandmarkerHelperListener = this,
+                runningMode = RunningMode.LIVE_STREAM
+            )
+        } catch (e: Exception) {
+            e.printStackTrace()
+            Log.e("MainActivity", "HandLandmarkerHelper initialization failed", e)
+        }
     }
 
-    private fun loadModelFile(): MappedByteBuffer {
-        val fileDescriptor: AssetFileDescriptor = this.assets.openFd("sign_language_detect_model.tflite")
-        val inputStream = FileInputStream(fileDescriptor.fileDescriptor)
-        val fileChannel: FileChannel = inputStream.channel
-        val startOffset = fileDescriptor.startOffset
-        val declaredLength = fileDescriptor.declaredLength
-        return fileChannel.map(FileChannel.MapMode.READ_ONLY, startOffset, declaredLength)
-    }
+    override fun onResume() {
+        super.onResume()
+        // 앱이 일시 중지된 상태에서 사용자가 권한을 제거할 수 있으므로, 모든 권한이 여전히 유효한지 확인
+        if (!PermissionsFragment.hasPermissions(this)) {
+            Navigation.findNavController(
+                this, R.id.fragment_container
+            ).navigate(R.id.action_camera_to_permissions)
+        }
 
-    private fun preprocessData(bitmap: Bitmap, numFrames: Int): Array<FloatArray> {
-        val options = ImageProcessingOptions.builder().build()
-        val results = mutableListOf<HandLandmarkerResult>()
-
-        // 여기서 numFrames 동안의 데이터를 수집합니다.
-        for (i in 0 until numFrames) {
-            val mpImage = convertBitmapToMPImage(bitmap)
-            val result = handLandmarker.detect(mpImage, options)
-            if (result.isNotEmpty()) {
-                results.add(result[0]) // 단일 프레임 결과만 가져옵니다.
+        // 사용자가 다시 전면으로 돌아올 때 HandLandmarkerHelper를 다시 시작
+        backgroundExecutor.execute {
+            if (handLandmarkerHelper.isClose()) {
+                handLandmarkerHelper.setupHandLandmarker()
             }
         }
+    }
 
-        val numLandmarks = results[0].landmarks().size
-        val numCoordinates = 3 // x, y, z 좌표
-        val totalCoordinates = numLandmarks * numCoordinates
+    override fun onPause() {
+        super.onPause()
+        if (this::handLandmarkerHelper.isInitialized) {
+            viewModel.setMaxHands(handLandmarkerHelper.maxNumHands)
+            viewModel.setMinHandDetectionConfidence(handLandmarkerHelper.minHandDetectionConfidence)
+            viewModel.setMinHandTrackingConfidence(handLandmarkerHelper.minHandTrackingConfidence)
+            viewModel.setMinHandPresenceConfidence(handLandmarkerHelper.minHandPresenceConfidence)
+            viewModel.setDelegate(handLandmarkerHelper.currentDelegate)
 
-        // 2차원 배열 생성: [프레임 수][각 관절당 좌표값]
-        val data = Array(numFrames) {
-            FloatArray(totalCoordinates)
+            // HandLandmarkerHelper를 닫고 자원을 해제
+            backgroundExecutor.execute { handLandmarkerHelper.clearHandLandmarker() }
         }
+    }
 
-        for (i in results.indices) {
-            val landmarks = results[i].landmarks()
-            for (j in landmarks.indices) {
-                val landmark = landmarks[j]
-                data[i][j * numCoordinates] = landmark.x
-                data[i][j * numCoordinates + 1] = landmark.y
-                data[i][j * numCoordinates + 2] = landmark.z
+    override fun onDestroy() {
+        super.onDestroy()
+        // 백그라운드 실행기를 종료
+        backgroundExecutor.shutdown()
+        backgroundExecutor.awaitTermination(Long.MAX_VALUE, TimeUnit.NANOSECONDS)
+    }
+
+    override fun onResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
+        val result = resultBundle.results.firstOrNull() ?: return
+
+        val landmarks = result.landmarks()
+        for (landmark in landmarks) {
+            for (point in landmark) {
+                val x = point.x()
+                val y = point.y()
+                val z = point.z()
+                val visibility = point.visibility()
+                Log.d("Landmark", "x: $x, y: $y, z: $z, visibility: $visibility")
             }
         }
-
-        return data
-    }
-
-    private fun convertBitmapToMPImage(bitmap: Bitmap): MPImage {
-        // Bitmap을 ByteBuffer로 변환
-        val byteBuffer = ByteBuffer.allocate(bitmap.byteCount)
-        bitmap.copyPixelsToBuffer(byteBuffer)
-        byteBuffer.rewind()
-
-        // ByteBuffer를 사용하여 ImageProxy를 생성 (임시적인 ImageReader 사용)
-        val imageReader = ImageReader.newInstance(bitmap.width, bitmap.height, ImageFormat.YUV_420_888, 2)
-        val image = imageReader.acquireNextImage()
-
-        // ImageProxy에서 MPImage로 변환
-        val mpImage = MPImage(image)
-
-        // ImageReader와 Image 해제
-        image.close()
-        imageReader.close()
-
-        return mpImage
-    }
-
-    private fun runInference(input: FloatArray): FloatArray {
-        val inputArray = arrayOf(input)
-        val outputArray = Array(1) { FloatArray(10) }
-        tflite.run(inputArray, outputArray)
-        return outputArray[0]
     }
 
     override fun onBackPressed() {
         finish()
+    }
+
+    override fun onError(error: String, errorCode: Int) {
+        Log.e("MainActivity", "Error: $error, ErrorCode: $errorCode")
     }
 }
