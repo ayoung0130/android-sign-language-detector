@@ -6,7 +6,7 @@
     android:layout_height="match_parent">
 
     <androidx.camera.view.PreviewView
-        android:id="@+id/camera_view"
+        android:id="@+id/view_finder"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         app:scaleType="fillStart" />
@@ -16,4 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
+    <include
+        android:id="@+id/bottom_sheet_layout"
+        layout="@layout/info_bottom_sheet" />
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
