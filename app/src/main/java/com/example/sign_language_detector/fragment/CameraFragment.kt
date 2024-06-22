@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
 import com.example.sign_language_detector.HandLandmarkerHelper
+import com.example.sign_language_detector.LandmarkProcessor
 import com.example.sign_language_detector.MainViewModel
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
@@ -40,6 +41,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener {
         get() = _fragmentCameraBinding!!
 
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
+    private lateinit var landmarkProcessor: LandmarkProcessor
     private val viewModel: MainViewModel by activityViewModels()
     private var preview: Preview? = null
     private var imageAnalyzer: ImageAnalysis? = null
@@ -49,6 +51,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener {
 
     /** Blocking ML operations are performed using this executor */
     private lateinit var backgroundExecutor: ExecutorService
+
+    private var action = "수어 동작을 시작하세요"
 
     override fun onResume() {
         super.onResume()
@@ -212,6 +216,12 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener {
 
                 // Force a redraw
                 fragmentCameraBinding.overlay.invalidate()
+
+//                val landmarkData = handLandmarkerHelper.getLandmarkData()
+//                if (landmarkData.isNotEmpty()) {
+//                    action = landmarkProcessor.processLandmarks(landmarkData)
+//                    handLandmarkerHelper.clearLandmarkData()
+//                }
             }
         }
     }
