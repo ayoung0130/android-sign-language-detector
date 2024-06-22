@@ -30,7 +30,7 @@
     </fragment>
 
     <fragment
-        android:id="@+id/gallery_fragment"
-        android:name="com.example.sign_language_detector.fragment.GalleryFragment"
+        android:id="@+id/questions_fragment"
+        android:name="com.example.sign_language_detector.fragment.QuestionsFragment"
         android:label="GalleryFragment" />
 </navigation>

@@ -20,6 +20,7 @@
         android:supportsRtl="true"
         android:taskAffinity=""
         android:theme="@style/AppTheme"
+        android:hardwareAccelerated="true"
         tools:ignore="AllowBackup">
 
         <activity
