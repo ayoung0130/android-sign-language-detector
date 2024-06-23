@@ -10,13 +10,15 @@ import androidx.core.content.ContextCompat
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
+import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
+import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
 import kotlin.math.max
 import kotlin.math.min
 
-class OverlayView(context: Context?, attrs: AttributeSet?) :
-    View(context, attrs) {
+class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs) {
 
-    private var results: HandLandmarkerResult? = null
+    private var handResults: HandLandmarkerResult? = null
+    private var poseResults: PoseLandmarkerResult? = null
     private var linePaint = Paint()
     private var pointPaint = Paint()
 
@@ -29,7 +31,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     fun clear() {
-        results = null
+        handResults = null
+        poseResults = null
         linePaint.reset()
         pointPaint.reset()
         invalidate()
@@ -37,8 +40,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
     }
 
     private fun initPaints() {
-        linePaint.color =
-            ContextCompat.getColor(context!!, R.color.mp_color_primary)
+        linePaint.color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
 
@@ -49,7 +51,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
 
     override fun draw(canvas: Canvas) {
         super.draw(canvas)
-        results?.let { handLandmarkerResult ->
+        handResults?.let { drawHandlandmark(it, canvas) }
+        poseResults?.let { drawPoseLandmark(it, canvas) }
+    }
+
+    private fun drawHandlandmark(result: HandLandmarkerResult, canvas: Canvas) {
+        super.draw(canvas)
+        result.let { handLandmarkerResult ->
             for (landmark in handLandmarkerResult.landmarks()) {
                 for (normalizedLandmark in landmark) {
                     canvas.drawPoint(
@@ -76,13 +84,37 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
         }
     }
 
-    fun setResults(
+    private fun drawPoseLandmark(result: PoseLandmarkerResult, canvas: Canvas) {
+        super.draw(canvas)
+        result.let { poseLandmarkerResult ->
+            for(landmark in poseLandmarkerResult.landmarks()) {
+                for(normalizedLandmark in landmark) {
+                    canvas.drawPoint(
+                        normalizedLandmark.x() * imageWidth * scaleFactor,
+                        normalizedLandmark.y() * imageHeight * scaleFactor,
+                        pointPaint
+                    )
+                }
+
+                PoseLandmarker.POSE_LANDMARKS.forEach {
+                    canvas.drawLine(
+                        poseLandmarkerResult.landmarks()[0][it!!.start()].x() * imageWidth * scaleFactor,
+                        poseLandmarkerResult.landmarks()[0][it.start()].y() * imageHeight * scaleFactor,
+                        poseLandmarkerResult.landmarks()[0][it.end()].x() * imageWidth * scaleFactor,
+                        poseLandmarkerResult.landmarks()[0][it.end()].y() * imageHeight * scaleFactor,
+                        linePaint)
+                }
+            }
+        }
+    }
+
+    fun setHandResults(
         handLandmarkerResults: HandLandmarkerResult,
         imageHeight: Int,
         imageWidth: Int,
         runningMode: RunningMode = RunningMode.IMAGE
     ) {
-        results = handLandmarkerResults
+        handResults = handLandmarkerResults
 
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth
@@ -93,9 +125,29 @@ class OverlayView(context: Context?, attrs: AttributeSet?) :
                 min(width * 1f / imageWidth, height * 1f / imageHeight)
             }
             RunningMode.LIVE_STREAM -> {
-                // PreviewView is in FILL_START mode. So we need to scale up the
-                // landmarks to match with the size that the captured images will be
-                // displayed.
+                max(width * 1f / imageWidth, height * 1f / imageHeight)
+            }
+        }
+        invalidate()
+    }
+
+    fun setPoseResults(
+        poseLandmarkerResults: PoseLandmarkerResult,
+        imageHeight: Int,
+        imageWidth: Int,
+        runningMode: RunningMode = RunningMode.IMAGE
+    ) {
+        poseResults = poseLandmarkerResults
+
+        this.imageHeight = imageHeight
+        this.imageWidth = imageWidth
+
+        scaleFactor = when (runningMode) {
+            RunningMode.IMAGE,
+            RunningMode.VIDEO -> {
+                min(width * 1f / imageWidth, height * 1f / imageHeight)
+            }
+            RunningMode.LIVE_STREAM -> {
                 max(width * 1f / imageWidth, height * 1f / imageHeight)
             }
         }

@@ -3,8 +3,6 @@ package com.example.sign_language_detector
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Matrix
-import android.media.MediaMetadataRetriever
-import android.net.Uri
 import android.os.SystemClock
 import android.util.Log
 import androidx.annotation.VisibleForTesting
@@ -16,7 +14,6 @@ import com.google.mediapipe.tasks.core.Delegate
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
-import java.util.Optional
 
 class HandLandmarkerHelper(
     var minHandDetectionConfidence: Float = DEFAULT_HAND_DETECTION_CONFIDENCE,
@@ -26,18 +23,17 @@ class HandLandmarkerHelper(
     var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
-    // this listener is only used when running in RunningMode.LIVE_STREAM
+    // 이 리스너는 RunningMode.LIVE_STREAM에서만 사용됩니다
     val handLandmarkerHelperListener: LandmarkerListener? = null
 ) {
 
-    // For this example this needs to be a var so it can be reset on changes.
-    // If the Hand Landmarker will not change, a lazy val would be preferable.
+    // 이 예제에서는 변경될 수 있으므로 var로 설정해야 합니다.
+    // Hand Landmarker가 변경되지 않는다면 lazy val를 사용하는 것이 좋습니다.
     private var handLandmarker: HandLandmarker? = null
 
     // 랜드마크 좌표값 저장을 위한 리스트
     private val leftHandData = mutableListOf<List<Quadruple<Float, Float, Float, Float>>>()
     private val rightHandData = mutableListOf<List<Quadruple<Float, Float, Float, Float>>>()
-    private val poseHandData = mutableListOf<List<Quadruple<Float, Float, Float, Float?>>>()
 
     private var isCollectingData = false
 
@@ -45,21 +41,19 @@ class HandLandmarkerHelper(
         setupHandLandmarker()
     }
 
-    // Return running status of HandLandmarkerHelper
+    // HandLandmarkerHelper의 실행 상태를 반환합니다
     fun isClose(): Boolean {
         return handLandmarker == null
     }
 
-    // Initialize the Hand landmarker using current settings on the
-    // thread that is using it. CPU can be used with Landmarker
-    // that are created on the main thread and used on a background thread, but
-    // the GPU delegate needs to be used on the thread that initialized the
-    // Landmarker
+    // 현재 설정을 사용하여 Hand landmarker를 초기화합니다.
+    // CPU는 메인 스레드에서 생성되고 백그라운드 스레드에서 사용되는 Landmarker와 함께 사용할 수 있지만,
+    // GPU 대리자는 Landmarker를 초기화한 스레드에서 사용해야 합니다.
     fun setupHandLandmarker() {
-        // Set general hand landmarker options
+        // 일반적인 hand landmarker 옵션 설정
         val baseOptionBuilder = BaseOptions.builder()
 
-        // Use the specified hardware for running the model. Default to CPU
+        // 모델 실행에 지정된 하드웨어를 사용합니다. 기본값은 CPU입니다.
         when (currentDelegate) {
             DELEGATE_CPU -> {
                 baseOptionBuilder.setDelegate(Delegate.CPU)
@@ -71,24 +65,23 @@ class HandLandmarkerHelper(
 
         baseOptionBuilder.setModelAssetPath(MP_HAND_LANDMARKER_TASK)
 
-        // Check if runningMode is consistent with handLandmarkerHelperListener
+        // runningMode가 handLandmarkerHelperListener와 일치하는지 확인합니다.
         when (runningMode) {
             RunningMode.LIVE_STREAM -> {
                 if (handLandmarkerHelperListener == null) {
                     throw IllegalStateException(
-                        "handLandmarkerHelperListener must be set when runningMode is LIVE_STREAM."
+                        "runningMode가 LIVE_STREAM일 때 handLandmarkerHelperListener가 설정되어야 합니다."
                     )
                 }
             }
             else -> {
-                // no-op
+                // 아무 작업도 수행하지 않습니다.
             }
         }
 
         try {
             val baseOptions = baseOptionBuilder.build()
-            // Create an option builder with base options and specific
-            // options only use for Hand Landmarker.
+            // base 옵션과 Hand Landmarker에만 사용되는 특정 옵션으로 옵션 빌더를 생성합니다.
             val optionsBuilder =
                 HandLandmarker.HandLandmarkerOptions.builder()
                     .setBaseOptions(baseOptions)
@@ -98,7 +91,7 @@ class HandLandmarkerHelper(
                     .setNumHands(maxNumHands)
                     .setRunningMode(runningMode)
 
-            // The ResultListener and ErrorListener only use for LIVE_STREAM mode.
+            // ResultListener와 ErrorListener는 LIVE_STREAM 모드에서만 사용됩니다.
             if (runningMode == RunningMode.LIVE_STREAM) {
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
@@ -109,41 +102,37 @@ class HandLandmarkerHelper(
             handLandmarker =
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-            handLandmarkerHelperListener?.onError(
-                "Hand Landmarker failed to initialize. See error logs for " +
-                        "details"
+            handLandmarkerHelperListener?.onHandError(
+                "Hand Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요."
             )
             Log.e(
-                TAG, "MediaPipe failed to load the task with error: " + e
-                    .message
+                TAG, "MediaPipe가 오류로 인해 태스크를 로드하지 못했습니다: " + e.message
             )
         } catch (e: RuntimeException) {
-            // This occurs if the model being used does not support GPU
-            handLandmarkerHelperListener?.onError(
-                "Hand Landmarker failed to initialize. See error logs for " +
-                        "details", GPU_ERROR
+            // GPU를 지원하지 않는 모델을 사용할 때 발생합니다.
+            handLandmarkerHelperListener?.onHandError(
+                "Hand Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요.", GPU_ERROR
             )
             Log.e(
                 TAG,
-                "Image classifier failed to load model with error: " + e.message
+                "이미지 분류기가 모델 로드에 실패했습니다: " + e.message
             )
         }
     }
 
-    // Convert the ImageProxy to MP Image and feed it to HandlandmakerHelper.
+    // ImageProxy를 MP Image로 변환하고 HandlandmarkerHelper에 전달합니다.
     fun detectLiveStream(
         imageProxy: ImageProxy,
         isFrontCamera: Boolean
     ) {
         if (runningMode != RunningMode.LIVE_STREAM) {
             throw IllegalArgumentException(
-                "Attempting to call detectLiveStream" +
-                        " while not using RunningMode.LIVE_STREAM"
+                "RunningMode.LIVE_STREAM이 아닌 상태에서 detectLiveStream을 호출하려고 합니다."
             )
         }
         val frameTime = SystemClock.uptimeMillis()
 
-        // Copy out RGB bits from the frame to a bitmap buffer
+        // 프레임에서 RGB 비트를 복사하여 비트맵 버퍼에 저장
         val bitmapBuffer =
             Bitmap.createBitmap(
                 imageProxy.width,
@@ -151,13 +140,13 @@ class HandLandmarkerHelper(
                 Bitmap.Config.ARGB_8888
             )
         imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-        imageProxy.close()
+//        imageProxy.close()
 
         val matrix = Matrix().apply {
-            // Rotate the frame received from the camera to be in the same direction as it'll be shown
+            // 카메라에서 받은 프레임을 표시되는 방향과 동일하게 회전
             postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
 
-            // flip image if user use front camera
+            // 사용자가 전면 카메라를 사용할 경우 이미지 반전
             if (isFrontCamera) {
                 postScale(
                     -1f,
@@ -172,21 +161,20 @@ class HandLandmarkerHelper(
             matrix, true
         )
 
-        // Convert the input Bitmap object to an MPImage object to run inference
+        // 입력 Bitmap 객체를 MPImage 객체로 변환하여 추론 실행
         val mpImage = BitmapImageBuilder(rotatedBitmap).build()
 
         detectAsync(mpImage, frameTime)
     }
 
-    // Run hand hand landmark using MediaPipe Hand Landmarker API
+    // MediaPipe Hand Landmarker API를 사용하여 손 랜드마크 실행
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
         handLandmarker?.detectAsync(mpImage, frameTime)
-        // As we're using running mode LIVE_STREAM, the landmark result will
-        // be returned in returnLivestreamResult function
+        // RunningMode.LIVE_STREAM을 사용하므로, 랜드마크 결과는 returnLivestreamResult 함수에서 반환됩니다.
     }
 
-    // Return the landmark result to this HandLandmarkerHelper's caller
+    // 이 HandLandmarkerHelper의 호출자에게 랜드마크 결과 반환
     private fun returnLivestreamResult(
         result: HandLandmarkerResult,
         input: MPImage
@@ -221,7 +209,7 @@ class HandLandmarkerHelper(
             }
         }
 
-        handLandmarkerHelperListener?.onResults(
+        handLandmarkerHelperListener?.onHandResults(
             ResultBundle(
                 listOf(result),
                 inferenceTime,
@@ -239,22 +227,23 @@ class HandLandmarkerHelper(
         rightHandData.clear()
     }
 
-    fun combineHandDataList(): List<List<Float>> {
+    private fun combineHandDataList(): List<List<Float>> {
         val combinedData = mutableListOf<List<Float>>()
         val size = maxOf(leftHandData.size, rightHandData.size)
         for (i in 0 until size) {
             val leftData = if (i < leftHandData.size) leftHandData[i] else List(21) { Quadruple(0f, 0f, 0f, 0f) }
             val rightData = if (i < rightHandData.size) rightHandData[i] else List(21) { Quadruple(0f, 0f, 0f, 0f) }
-            combinedData.add((leftData + rightData).flatMap { listOf(it.first, it.second, it.third, it.fourth ?: 0f) })
+            combinedData.add((leftData + rightData).flatMap { listOf(it.first, it.second, it.third,
+                it.fourth
+            ) })
         }
         return combinedData
     }
 
-    // Return errors thrown during detection to this HandLandmarkerHelper's
-    // caller
+    // 이 HandLandmarkerHelper의 호출자에게 감지 중 발생한 오류 반환
     private fun returnLivestreamError(error: RuntimeException) {
-        handLandmarkerHelperListener?.onError(
-            error.message ?: "An unknown error has occurred"
+        handLandmarkerHelperListener?.onHandError(
+            error.message ?: "알 수 없는 오류가 발생했습니다"
         )
     }
 
@@ -280,8 +269,8 @@ class HandLandmarkerHelper(
     )
 
     interface LandmarkerListener {
-        fun onError(error: String, errorCode: Int = OTHER_ERROR)
-        fun onResults(resultBundle: ResultBundle)
+        fun onHandError(error: String, errorCode: Int = OTHER_ERROR)
+        fun onHandResults(resultBundle: ResultBundle)
     }
 
     // x, y, z 좌표와 가시성 정보를 저장하는 데이터 클래스
@@ -296,7 +285,7 @@ class HandLandmarkerHelper(
 
 
     // 가시성 정보 처리
-    fun setVisibility(x: Float, y: Float, epsilon: Float = 1e-6f): Float {
+    private fun setVisibility(x: Float, y: Float, epsilon: Float = 1e-6f): Float {
         return when {
             x <= epsilon && y <= epsilon -> 0f
             x <= epsilon || y <= epsilon -> 0.5f

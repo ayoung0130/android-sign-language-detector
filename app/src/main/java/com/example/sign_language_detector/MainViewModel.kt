@@ -3,10 +3,11 @@ package com.example.sign_language_detector
 import androidx.lifecycle.ViewModel
 
 /**
- *  This ViewModel is used to store hand landmarker helper settings
+ *  이 ViewModel은 hand/pose landmarker 헬퍼 설정을 저장하는 데 사용됩니다
  */
 class MainViewModel : ViewModel() {
 
+    // hand
     private var _delegate: Int = HandLandmarkerHelper.DELEGATE_CPU
     private var _minHandDetectionConfidence: Float =
         HandLandmarkerHelper.DEFAULT_HAND_DETECTION_CONFIDENCE
@@ -28,21 +29,19 @@ class MainViewModel : ViewModel() {
             _minHandPresenceConfidence
     val currentMaxHands: Int get() = _maxHands
 
-    fun setDelegate(delegate: Int) {
-        _delegate = delegate
-    }
 
-    fun setMinHandDetectionConfidence(confidence: Float) {
-        _minHandDetectionConfidence = confidence
-    }
-    fun setMinHandTrackingConfidence(confidence: Float) {
-        _minHandTrackingConfidence = confidence
-    }
-    fun setMinHandPresenceConfidence(confidence: Float) {
-        _minHandPresenceConfidence = confidence
-    }
+    // pose
+    private var _minPoseDetectionConfidence: Float =
+        PoseLandmarkerHelper.DEFAULT_POSE_DETECTION_CONFIDENCE
+    private var _minPoseTrackingConfidence: Float =
+        PoseLandmarkerHelper.DEFAULT_POSE_TRACKING_CONFIDENCE
+    private var _minPosePresenceConfidence: Float =
+        PoseLandmarkerHelper.DEFAULT_POSE_PRESENCE_CONFIDENCE
 
-    fun setMaxHands(maxResults: Int) {
-        _maxHands = maxResults
-    }
+    val currentMinPoseDetectionConfidence: Float
+        get() = _minPoseDetectionConfidence
+    val currentMinPoseTrackingConfidence: Float
+        get() = _minPoseTrackingConfidence
+    val currentMinPosePresenceConfidence: Float
+        get() = _minPosePresenceConfidence
 }

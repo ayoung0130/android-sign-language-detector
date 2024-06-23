@@ -7,10 +7,16 @@ tasks.register('downloadTaskFile', Download) {
 preBuild.dependsOn downloadTaskFile
 
 
+tasks.register('downloadTaskFile1', Download) {
+    src 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_full/float16/1/pose_landmarker_full.task'
+    dest project.ext.ASSET_DIR + '/pose_landmarker_full.task'
+    overwrite false
+}
+
 tasks.register('downloadTaskFile2', Download) {
     src 'https://storage.googleapis.com/mediapipe-models/pose_landmarker/pose_landmarker_lite/float16/1/pose_landmarker_lite.task'
     dest project.ext.ASSET_DIR + '/pose_landmarker_lite.task'
     overwrite false
 }
 
-preBuild.dependsOn downloadTaskFile2
+preBuild.dependsOn downloadTaskFile1, downloadTaskFile2
