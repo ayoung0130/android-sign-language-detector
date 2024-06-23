@@ -23,12 +23,9 @@ class HandLandmarkerHelper(
     var currentDelegate: Int = DELEGATE_CPU,
     var runningMode: RunningMode = RunningMode.IMAGE,
     val context: Context,
-    // 이 리스너는 RunningMode.LIVE_STREAM에서만 사용됩니다
     val handLandmarkerHelperListener: LandmarkerListener? = null
 ) {
 
-    // 이 예제에서는 변경될 수 있으므로 var로 설정해야 합니다.
-    // Hand Landmarker가 변경되지 않는다면 lazy val를 사용하는 것이 좋습니다.
     private var handLandmarker: HandLandmarker? = null
 
     // 랜드마크 좌표값 저장을 위한 리스트
@@ -41,19 +38,19 @@ class HandLandmarkerHelper(
         setupHandLandmarker()
     }
 
-    // HandLandmarkerHelper의 실행 상태를 반환합니다
+    // HandLandmarkerHelper의 실행 상태를 반환
     fun isClose(): Boolean {
         return handLandmarker == null
     }
 
-    // 현재 설정을 사용하여 Hand landmarker를 초기화합니다.
+    // 현재 설정을 사용하여 Hand landmarker를 초기화
     // CPU는 메인 스레드에서 생성되고 백그라운드 스레드에서 사용되는 Landmarker와 함께 사용할 수 있지만,
-    // GPU 대리자는 Landmarker를 초기화한 스레드에서 사용해야 합니다.
+    // GPU 대리자는 Landmarker를 초기화한 스레드에서 사용해야 함
     fun setupHandLandmarker() {
         // 일반적인 hand landmarker 옵션 설정
         val baseOptionBuilder = BaseOptions.builder()
 
-        // 모델 실행에 지정된 하드웨어를 사용합니다. 기본값은 CPU입니다.
+        // 모델 실행에 지정된 하드웨어를 사용. 기본값은 CPU.
         when (currentDelegate) {
             DELEGATE_CPU -> {
                 baseOptionBuilder.setDelegate(Delegate.CPU)
@@ -65,7 +62,7 @@ class HandLandmarkerHelper(
 
         baseOptionBuilder.setModelAssetPath(MP_HAND_LANDMARKER_TASK)
 
-        // runningMode가 handLandmarkerHelperListener와 일치하는지 확인합니다.
+        // runningMode가 handLandmarkerHelperListener와 일치하는지 확인.
         when (runningMode) {
             RunningMode.LIVE_STREAM -> {
                 if (handLandmarkerHelperListener == null) {
@@ -75,13 +72,13 @@ class HandLandmarkerHelper(
                 }
             }
             else -> {
-                // 아무 작업도 수행하지 않습니다.
+                // no-op
             }
         }
 
         try {
             val baseOptions = baseOptionBuilder.build()
-            // base 옵션과 Hand Landmarker에만 사용되는 특정 옵션으로 옵션 빌더를 생성합니다.
+            // base 옵션과 Hand Landmarker에만 사용되는 특정 옵션으로 옵션 빌더를 생성.
             val optionsBuilder =
                 HandLandmarker.HandLandmarkerOptions.builder()
                     .setBaseOptions(baseOptions)
@@ -91,7 +88,7 @@ class HandLandmarkerHelper(
                     .setNumHands(maxNumHands)
                     .setRunningMode(runningMode)
 
-            // ResultListener와 ErrorListener는 LIVE_STREAM 모드에서만 사용됩니다.
+            // ResultListener와 ErrorListener는 LIVE_STREAM 모드에서만 사용.
             if (runningMode == RunningMode.LIVE_STREAM) {
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
@@ -120,7 +117,7 @@ class HandLandmarkerHelper(
         }
     }
 
-    // ImageProxy를 MP Image로 변환하고 HandlandmarkerHelper에 전달합니다.
+    // ImageProxy를 MP Image로 변환하고 HandlandmarkerHelper에 전달
     fun detectLiveStream(
         imageProxy: ImageProxy,
         isFrontCamera: Boolean
@@ -140,7 +137,7 @@ class HandLandmarkerHelper(
                 Bitmap.Config.ARGB_8888
             )
         imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-//        imageProxy.close()
+        imageProxy.close()
 
         val matrix = Matrix().apply {
             // 카메라에서 받은 프레임을 표시되는 방향과 동일하게 회전
@@ -171,7 +168,7 @@ class HandLandmarkerHelper(
     @VisibleForTesting
     fun detectAsync(mpImage: MPImage, frameTime: Long) {
         handLandmarker?.detectAsync(mpImage, frameTime)
-        // RunningMode.LIVE_STREAM을 사용하므로, 랜드마크 결과는 returnLivestreamResult 함수에서 반환됩니다.
+        // RunningMode.LIVE_STREAM을 사용하므로, 랜드마크 결과는 returnLivestreamResult 함수에서 반환
     }
 
     // 이 HandLandmarkerHelper의 호출자에게 랜드마크 결과 반환

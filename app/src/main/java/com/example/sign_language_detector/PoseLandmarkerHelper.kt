@@ -54,7 +54,7 @@ class PoseLandmarkerHelper(
             RunningMode.LIVE_STREAM -> {
                 if (poseLandmarkerHelperListener == null) {
                     throw IllegalStateException(
-                        "poseLandmarkerHelperListener must be set when runningMode is LIVE_STREAM."
+                        "runningMode가 LIVE_STREAM일 때 handLandmarkerHelperListener가 설정되어야 합니다."
                     )
                 }
             }
@@ -83,14 +83,14 @@ class PoseLandmarkerHelper(
             poseLandmarker = PoseLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
             poseLandmarkerHelperListener?.onPoseError(
-                "Pose Landmarker failed to initialize. See error logs for details."
+                "Pose Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요."
             )
-            Log.e(TAG, "MediaPipe failed to load the task with error: " + e.message)
+            Log.e(TAG, "MediaPipe가 오류로 인해 태스크를 로드하지 못했습니다: " + e.message)
         } catch (e: RuntimeException) {
             poseLandmarkerHelperListener?.onPoseError(
-                "Pose Landmarker failed to initialize. See error logs for details.", GPU_ERROR
+                "Pose Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요.", GPU_ERROR
             )
-            Log.e(TAG, "Image classifier failed to load model with error: " + e.message)
+            Log.e(TAG, "이미지 분류기가 모델 로드에 실패했습니다: " + e.message)
         }
     }
 
@@ -100,7 +100,7 @@ class PoseLandmarkerHelper(
     ) {
         if (runningMode != RunningMode.LIVE_STREAM) {
             throw IllegalArgumentException(
-                "Attempting to call detectLiveStream while not using RunningMode.LIVE_STREAM"
+                "RunningMode.LIVE_STREAM이 아닌 상태에서 detectLiveStream을 호출하려고 합니다."
             )
         }
         val frameTime = SystemClock.uptimeMillis()
@@ -111,7 +111,7 @@ class PoseLandmarkerHelper(
             Bitmap.Config.ARGB_8888
         )
         imageProxy.use { bitmapBuffer.copyPixelsFromBuffer(imageProxy.planes[0].buffer) }
-//        imageProxy.close()
+        imageProxy.close()
 
         val matrix = Matrix().apply {
             postRotate(imageProxy.imageInfo.rotationDegrees.toFloat())
@@ -152,13 +152,13 @@ class PoseLandmarkerHelper(
 
     private fun returnLivestreamError(error: RuntimeException) {
         poseLandmarkerHelperListener?.onPoseError(
-            error.message ?: "An unknown error has occurred"
+            error.message ?: "알 수 없는 오류가 발생했습니다"
         )
     }
 
     companion object {
         const val TAG = "PoseLandmarkerHelper"
-        private const val MP_POSE_LANDMARKER_TASK = "pose_landmarker_full.task"
+        private const val MP_POSE_LANDMARKER_TASK = "pose_landmarker_lite.task"
 
         const val DELEGATE_CPU = 0
         const val DELEGATE_GPU = 1

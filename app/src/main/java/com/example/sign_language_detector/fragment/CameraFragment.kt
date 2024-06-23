@@ -48,12 +48,13 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private lateinit var landmarkProcessor: LandmarkProcessor
     private val viewModel: MainViewModel by activityViewModels()
     private var preview: Preview? = null
-    private var imageAnalyzer: ImageAnalysis? = null
+    private var imageHandAnalyzer: ImageAnalysis? = null
+    private var imagePoseAnalyzer: ImageAnalysis? = null
     private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
 
-    /** 차단된 ML 작업은 이 실행기를 사용하여 수행됩니다 */
+    /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
 
     private var action = "수어 동작을 시작하세요"
@@ -169,7 +170,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             .build()
 
         // 이미지 분석. 모델이 작동하는 방식을 맞추기 위해 RGBA 8888 사용
-        imageAnalyzer = ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
+        imageHandAnalyzer = ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
             .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
             .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
             .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
@@ -177,6 +178,16 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             .also {
                 it.setAnalyzer(backgroundExecutor) { image ->
                     detectHand(image)
+                }
+            }
+
+        imagePoseAnalyzer = ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
+            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
+            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
+            .build()
+            .also {
+                it.setAnalyzer(backgroundExecutor) { image ->
                     detectPose(image)
                 }
             }
@@ -185,10 +196,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         cameraProvider.unbindAll()
 
         try {
-            // 가변 수의 사용 사례를 전달할 수 있음
             // 카메라는 CameraControl 및 CameraInfo에 접근 제공
             camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageAnalyzer
+                this, cameraSelector, preview, imageHandAnalyzer, imagePoseAnalyzer
             )
             // 뷰 파인더의 서피스 공급자를 프리뷰 사용 사례에 연결
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
@@ -221,14 +231,14 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        imageAnalyzer?.targetRotation =
+        imageHandAnalyzer?.targetRotation =
+            fragmentCameraBinding.viewFinder.display.rotation
+        imagePoseAnalyzer?.targetRotation =
             fragmentCameraBinding.viewFinder.display.rotation
     }
 
     // 손이 감지된 후 UI 업데이트. 오리지널 이미지 높이/너비를 추출하고 캔버스를 통해 랜드마크를 올바르게 배치
-    override fun onHandResults(
-        resultBundle: HandLandmarkerHelper.ResultBundle
-    ) {
+    override fun onHandResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
             if (_fragmentCameraBinding != null) {
                 // 필요한 정보를 OverlayView에 전달하여 캔버스에 그림

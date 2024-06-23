@@ -3,7 +3,7 @@ package com.example.sign_language_detector
 import androidx.lifecycle.ViewModel
 
 /**
- *  이 ViewModel은 hand/pose landmarker 헬퍼 설정을 저장하는 데 사용됩니다
+ *  이 ViewModel은 hand/pose landmarker 헬퍼 설정을 저장하는 데 사용
  */
 class MainViewModel : ViewModel() {
 

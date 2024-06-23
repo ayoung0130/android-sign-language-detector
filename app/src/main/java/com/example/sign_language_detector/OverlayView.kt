@@ -30,15 +30,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         initPaints()
     }
 
-    fun clear() {
-        handResults = null
-        poseResults = null
-        linePaint.reset()
-        pointPaint.reset()
-        invalidate()
-        initPaints()
-    }
-
     private fun initPaints() {
         linePaint.color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
@@ -58,7 +49,16 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private fun drawHandlandmark(result: HandLandmarkerResult, canvas: Canvas) {
         super.draw(canvas)
         result.let { handLandmarkerResult ->
-            for (landmark in handLandmarkerResult.landmarks()) {
+            handLandmarkerResult.landmarks().forEachIndexed { index, landmark ->
+                val handedness = handLandmarkerResult.handedness()[index].first().categoryName()
+                // 왼손 -> GREEN, 오른손 -> YELLOW 로 고려
+                val lineColor = if (handedness == "Right") Color.GREEN else Color.YELLOW
+                val linePaint = Paint().apply {
+                    color = lineColor
+                    strokeWidth = LANDMARK_STROKE_WIDTH
+                    style = Paint.Style.STROKE
+                }
+
                 for (normalizedLandmark in landmark) {
                     canvas.drawPoint(
                         normalizedLandmark.x() * imageWidth * scaleFactor,
@@ -87,8 +87,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private fun drawPoseLandmark(result: PoseLandmarkerResult, canvas: Canvas) {
         super.draw(canvas)
         result.let { poseLandmarkerResult ->
-            for(landmark in poseLandmarkerResult.landmarks()) {
-                for(normalizedLandmark in landmark) {
+            for (landmark in poseLandmarkerResult.landmarks()) {
+                for (normalizedLandmark in landmark) {
                     canvas.drawPoint(
                         normalizedLandmark.x() * imageWidth * scaleFactor,
                         normalizedLandmark.y() * imageHeight * scaleFactor,
@@ -102,7 +102,8 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                         poseLandmarkerResult.landmarks()[0][it.start()].y() * imageHeight * scaleFactor,
                         poseLandmarkerResult.landmarks()[0][it.end()].x() * imageWidth * scaleFactor,
                         poseLandmarkerResult.landmarks()[0][it.end()].y() * imageHeight * scaleFactor,
-                        linePaint)
+                        linePaint
+                    )
                 }
             }
         }
@@ -124,6 +125,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             RunningMode.VIDEO -> {
                 min(width * 1f / imageWidth, height * 1f / imageHeight)
             }
+
             RunningMode.LIVE_STREAM -> {
                 max(width * 1f / imageWidth, height * 1f / imageHeight)
             }
@@ -147,6 +149,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
             RunningMode.VIDEO -> {
                 min(width * 1f / imageWidth, height * 1f / imageHeight)
             }
+
             RunningMode.LIVE_STREAM -> {
                 max(width * 1f / imageWidth, height * 1f / imageHeight)
             }
