@@ -46,4 +46,8 @@ class DetectUseCase(
             landmarkProcessor.processLandmarks(resultHandBundle, resultPoseBundle)
         }
     }
+
+    fun getProcessedData(): List<List<Float>> {
+        return landmarkProcessor.getLandmarkData()
+    }
 }

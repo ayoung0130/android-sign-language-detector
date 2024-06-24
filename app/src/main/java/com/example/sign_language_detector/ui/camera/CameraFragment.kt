@@ -1,6 +1,7 @@
 package com.example.sign_language_detector.ui.camera
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -26,6 +27,7 @@ import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.ui.permissions.PermissionsFragment
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
+import com.example.sign_language_detector.util.ModelPredictProcessor
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ExecutorService
@@ -42,10 +44,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         get() = _fragmentCameraBinding!!
 
     private lateinit var viewModel: CameraViewModel
-
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
-
     private var preview: Preview? = null
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
@@ -132,13 +132,19 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             poseLandmarkerHelper = poseLandmarkerHelper,
             executor = backgroundExecutor
         )
-        val factory = CameraViewModelFactory(detectUseCase)
-        viewModel = ViewModelProvider(this, factory).get(CameraViewModel::class.java)
+        val modelPredictProcessor = ModelPredictProcessor(requireContext())
+        val factory = CameraViewModelFactory(detectUseCase, modelPredictProcessor)
+        viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
 
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
             // 카메라와 그 사용 사례를 설정
             setUpCamera()
+        }
+
+        // 모델 예측 관찰
+        viewModel.predictedWord.observe(viewLifecycleOwner) {
+            fragmentCameraBinding.predict?.text
         }
     }
 

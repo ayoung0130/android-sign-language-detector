@@ -25,8 +25,8 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(sequenceData: List<List<Float>>): String {
-        val inputSequences = createSequences(sequenceData, 30, 10)
+    fun predict(data: List<List<Float>>): String {
+        val inputSequences = createSequences(data, 30, 10)
         val predictions = mutableListOf<Int>()
 
         for (sequence in inputSequences) {

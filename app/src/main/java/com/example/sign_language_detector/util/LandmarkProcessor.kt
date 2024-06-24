@@ -75,6 +75,10 @@ class LandmarkProcessor {
         }
     }
 
+    fun getLandmarkData(): List<List<Float>> {
+        return combinedData
+    }
+
     private fun clearData() {
         combinedData.clear()
     }
