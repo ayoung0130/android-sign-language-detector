@@ -1,10 +1,10 @@
-package com.example.sign_language_detector
+package com.example.sign_language_detector.ui
 
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.appcompat.app.AppCompatActivity
 import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
+import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
@@ -21,7 +21,4 @@ class MainActivity : AppCompatActivity() {
         binding.navigation.setupWithNavController(navController)
     }
 
-    override fun onBackPressed() {
-       finish()
-    }
 }

@@ -1,4 +1,4 @@
-package com.example.sign_language_detector.fragment
+package com.example.sign_language_detector.ui.permissions
 
 import android.Manifest
 import android.content.Context

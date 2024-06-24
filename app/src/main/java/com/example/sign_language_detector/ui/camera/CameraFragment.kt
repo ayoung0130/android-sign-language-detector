@@ -1,4 +1,4 @@
-package com.example.sign_language_detector.fragment
+package com.example.sign_language_detector.ui.camera
 
 import android.annotation.SuppressLint
 import android.content.res.Configuration
@@ -19,14 +19,13 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.Navigation
-import com.example.sign_language_detector.HandLandmarkerHelper
-import com.example.sign_language_detector.LandmarkProcessor
-import com.example.sign_language_detector.MainViewModel
-import com.example.sign_language_detector.PoseLandmarkerHelper
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
+import com.example.sign_language_detector.repository.HandLandmarkerHelper
+import com.example.sign_language_detector.repository.PoseLandmarkerHelper
+import com.example.sign_language_detector.ui.permissions.PermissionsFragment
+import com.example.sign_language_detector.util.LandmarkProcessor
 import com.google.mediapipe.tasks.vision.core.RunningMode
-import kotlinx.coroutines.runBlocking
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
@@ -43,10 +42,11 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
+    private val viewModel: CameraViewModel by activityViewModels()
+
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
     private lateinit var landmarkProcessor: LandmarkProcessor
-    private val viewModel: MainViewModel by activityViewModels()
     private var preview: Preview? = null
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
@@ -56,8 +56,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
-
-    private var action = "수어 동작을 시작하세요"
 
     override fun onResume() {
         super.onResume()
@@ -108,33 +106,31 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         // 백그라운드 실행기 초기화
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
+        // HandLandmarkerHelper와 PoseLandmarkerHelper를 직접 초기화
+        handLandmarkerHelper = HandLandmarkerHelper(
+            context = requireContext(),
+            runningMode = RunningMode.LIVE_STREAM,
+            minHandDetectionConfidence = 0.5f,
+            minHandTrackingConfidence = 0.5f,
+            minHandPresenceConfidence = 0.5f,
+            maxNumHands = 2,
+            currentDelegate = 0,
+            handLandmarkerHelperListener = this@CameraFragment
+        )
+        poseLandmarkerHelper = PoseLandmarkerHelper(
+            context = requireContext(),
+            runningMode = RunningMode.LIVE_STREAM,
+            minPoseDetectionConfidence = 0.5f,
+            minPoseTrackingConfidence = 0.5f,
+            minPosePresenceConfidence = 0.5f,
+            currentDelegate = 0,
+            poseLandmarkerHelperListener = this@CameraFragment
+        )
+
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
             // 카메라와 그 사용 사례를 설정
             setUpCamera()
-        }
-
-        // 추론을 처리할 HandLandmarkerHelper 생성
-        backgroundExecutor.execute {
-            handLandmarkerHelper = HandLandmarkerHelper(
-                context = requireContext(),
-                runningMode = RunningMode.LIVE_STREAM,
-                minHandDetectionConfidence = viewModel.currentMinHandDetectionConfidence,
-                minHandTrackingConfidence = viewModel.currentMinHandTrackingConfidence,
-                minHandPresenceConfidence = viewModel.currentMinHandPresenceConfidence,
-                maxNumHands = viewModel.currentMaxHands,
-                currentDelegate = viewModel.currentDelegate,
-                handLandmarkerHelperListener = this@CameraFragment
-            )
-            poseLandmarkerHelper = PoseLandmarkerHelper(
-                context = requireContext(),
-                runningMode = RunningMode.LIVE_STREAM,
-                minPoseDetectionConfidence = viewModel.currentMinPoseDetectionConfidence,
-                minPoseTrackingConfidence = viewModel.currentMinPoseTrackingConfidence,
-                minPosePresenceConfidence = viewModel.currentMinPosePresenceConfidence,
-                currentDelegate = viewModel.currentDelegate,
-                poseLandmarkerHelperListener = this@CameraFragment
-            )
         }
     }
 
@@ -177,7 +173,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             .build()
             .also {
                 it.setAnalyzer(backgroundExecutor) { image ->
-                    detectHand(image)
+                    viewModel.detectHand(image, cameraFacing == CameraSelector.LENS_FACING_FRONT)
                 }
             }
 
@@ -188,7 +184,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             .build()
             .also {
                 it.setAnalyzer(backgroundExecutor) { image ->
-                    detectPose(image)
+                    viewModel.detectPose(image, cameraFacing == CameraSelector.LENS_FACING_FRONT)
                 }
             }
 
@@ -204,28 +200,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
-        }
-    }
-
-    private fun detectHand(imageProxy: ImageProxy) {
-        try {
-            handLandmarkerHelper.detectLiveStream(
-                imageProxy = imageProxy,
-                isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Hand detection failed", e)
-        }
-    }
-
-    private fun detectPose(imageProxy: ImageProxy) {
-        try {
-            poseLandmarkerHelper.detectLiveStream(
-                imageProxy = imageProxy,
-                isFrontCamera = cameraFacing == CameraSelector.LENS_FACING_FRONT
-            )
-        } catch (e: Exception) {
-            Log.e(TAG, "Pose detection failed", e)
         }
     }
 

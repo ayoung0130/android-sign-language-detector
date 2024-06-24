@@ -1,10 +1,7 @@
-package com.example.sign_language_detector
+package com.example.sign_language_detector.util
 
 import android.content.Context
-import org.tensorflow.lite.Interpreter
-import java.nio.ByteBuffer
-import java.nio.ByteOrder
-import java.util.*
+import com.example.sign_language_detector.repository.HandLandmarkerHelper
 
 class LandmarkProcessor(context: Context) {
 

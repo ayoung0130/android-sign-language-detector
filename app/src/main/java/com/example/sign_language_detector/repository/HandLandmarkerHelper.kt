@@ -1,4 +1,4 @@
-package com.example.sign_language_detector
+package com.example.sign_language_detector.repository
 
 import android.content.Context
 import android.graphics.Bitmap
@@ -188,7 +188,7 @@ class HandLandmarkerHelper(
                     val visibility = setVisibility(lm.x(), lm.y())
                     Quadruple(lm.x(), lm.y(), lm.z(), visibility)
                 }
-                val handedness = result.handedness()[index].first().categoryName()
+                val handedness = result.handednesses()[index].first().categoryName()
                 if (handedness == "Right") {
                     leftHandData.add(landmarks)
                 } else if (handedness == "Left") {

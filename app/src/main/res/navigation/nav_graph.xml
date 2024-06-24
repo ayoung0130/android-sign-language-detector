@@ -6,7 +6,7 @@
 
     <fragment
         android:id="@+id/permissions_fragment"
-        android:name="com.example.sign_language_detector.fragment.PermissionsFragment"
+        android:name="com.example.sign_language_detector.ui.permissions.PermissionsFragment"
         android:label="PermissionsFragment">
 
         <action
@@ -19,7 +19,7 @@
 
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.example.sign_language_detector.fragment.CameraFragment"
+        android:name="com.example.sign_language_detector.ui.camera.CameraFragment"
         android:label="CameraFragment">
 
         <action
@@ -31,6 +31,6 @@
 
     <fragment
         android:id="@+id/questions_fragment"
-        android:name="com.example.sign_language_detector.fragment.QuestionsFragment"
+        android:name="com.example.sign_language_detector.ui.questions.QuestionsFragment"
         android:label="GalleryFragment" />
 </navigation>

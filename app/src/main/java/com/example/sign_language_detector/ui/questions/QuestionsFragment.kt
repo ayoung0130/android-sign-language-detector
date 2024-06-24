@@ -1,4 +1,4 @@
-package com.example.sign_language_detector.fragment
+package com.example.sign_language_detector.ui.questions
 
 import android.os.Bundle
 import android.view.LayoutInflater

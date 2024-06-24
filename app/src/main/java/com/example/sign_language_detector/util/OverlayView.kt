@@ -1,4 +1,4 @@
-package com.example.sign_language_detector
+package com.example.sign_language_detector.util
 
 import android.content.Context
 import android.graphics.Canvas
@@ -7,6 +7,7 @@ import android.graphics.Paint
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
+import com.example.sign_language_detector.R
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
@@ -50,7 +51,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         super.draw(canvas)
         result.let { handLandmarkerResult ->
             handLandmarkerResult.landmarks().forEachIndexed { index, landmark ->
-                val handedness = handLandmarkerResult.handedness()[index].first().categoryName()
+                val handedness = handLandmarkerResult.handednesses()[index].first().categoryName()
                 // 왼손 -> GREEN, 오른손 -> YELLOW 로 고려
                 val lineColor = if (handedness == "Right") Color.GREEN else Color.YELLOW
                 val linePaint = Paint().apply {

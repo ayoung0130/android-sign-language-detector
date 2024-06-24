@@ -1,4 +1,4 @@
-package com.example.sign_language_detector
+package com.example.sign_language_detector.repository
 
 import android.content.Context
 import android.graphics.Bitmap
