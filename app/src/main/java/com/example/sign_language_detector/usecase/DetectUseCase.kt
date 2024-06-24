@@ -44,8 +44,6 @@ class DetectUseCase(
     fun processLandmarks(resultHandBundle: HandLandmarkerHelper.ResultBundle, resultPoseBundle: PoseLandmarkerHelper.ResultBundle) {
         executor.execute {
             landmarkProcessor.processLandmarks(resultHandBundle, resultPoseBundle)
-            Log.d("결과", "$resultHandBundle")
-            Log.d("결과", "$resultPoseBundle")
         }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.sign_language_detector.util
 
-import android.util.Log
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import kotlin.math.acos
@@ -19,8 +18,6 @@ class LandmarkProcessor {
         resultHandBundle: HandLandmarkerHelper.ResultBundle,
         resultPoseBundle: PoseLandmarkerHelper.ResultBundle,
     ) {
-        Log.d("Landmark", "resultHandBundle.results: ${resultHandBundle.results}")
-
         // 손 랜드마크 처리
         if (resultHandBundle.results.isNotEmpty()) {
 
@@ -73,17 +70,10 @@ class LandmarkProcessor {
         } else {
             if (isCollectingData) {
                 isCollectingData = false
-//                Log.d("Landmark", "Combined Data Size: ${combinedData.size}")
-//                combinedData.forEachIndexed { index, data ->
-//                    Log.d("Landmark", "Frame $index: $data")
-//                }
-
                 clearData()
             }
         }
     }
-
-    fun getLandmarkData(): List<List<Float>> = combinedData
 
     private fun clearData() {
         combinedData.clear()
