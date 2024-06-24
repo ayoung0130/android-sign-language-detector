@@ -137,13 +137,10 @@ class PoseLandmarkerHelper(
         result: PoseLandmarkerResult,
         input: MPImage
     ) {
-        val finishTimeMs = SystemClock.uptimeMillis()
-        val inferenceTime = finishTimeMs - result.timestampMs()
 
         poseLandmarkerHelperListener?.onPoseResults(
             ResultBundle(
                 listOf(result),
-                inferenceTime,
                 input.height,
                 input.width
             )
@@ -171,7 +168,6 @@ class PoseLandmarkerHelper(
 
     data class ResultBundle(
         val results: List<PoseLandmarkerResult>,
-        val inferenceTime: Long,
         val inputImageHeight: Int,
         val inputImageWidth: Int,
     )

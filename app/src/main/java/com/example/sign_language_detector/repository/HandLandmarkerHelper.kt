@@ -170,13 +170,10 @@ class HandLandmarkerHelper(
         result: HandLandmarkerResult,
         input: MPImage
     ) {
-        val finishTimeMs = SystemClock.uptimeMillis()
-        val inferenceTime = finishTimeMs - result.timestampMs()
 
         handLandmarkerHelperListener?.onHandResults(
             ResultBundle(
                 listOf(result),
-                inferenceTime,
                 input.height,
                 input.width
             )
@@ -192,7 +189,6 @@ class HandLandmarkerHelper(
 
     data class ResultBundle(
         val results: List<HandLandmarkerResult>,
-        val inferenceTime: Long,
         val inputImageHeight: Int,
         val inputImageWidth: Int,
     )
