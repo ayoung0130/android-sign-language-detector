@@ -28,12 +28,6 @@ class HandLandmarkerHelper(
 
     private var handLandmarker: HandLandmarker? = null
 
-    // 랜드마크 좌표값 저장을 위한 리스트
-    private val leftHandData = mutableListOf<List<Quadruple<Float, Float, Float, Float>>>()
-    private val rightHandData = mutableListOf<List<Quadruple<Float, Float, Float, Float>>>()
-
-    private var isCollectingData = false
-
     init {
         setupHandLandmarker()
     }
@@ -179,33 +173,6 @@ class HandLandmarkerHelper(
         val finishTimeMs = SystemClock.uptimeMillis()
         val inferenceTime = finishTimeMs - result.timestampMs()
 
-        if(result.landmarks().isNotEmpty()) {
-            isCollectingData = true
-
-            // 랜드마크 좌표값 수집
-            result.landmarks().forEachIndexed { index, hand ->
-                val landmarks = hand.map { lm ->
-                    val visibility = setVisibility(lm.x(), lm.y())
-                    Quadruple(lm.x(), lm.y(), lm.z(), visibility)
-                }
-                val handedness = result.handednesses()[index].first().categoryName()
-                if (handedness == "Right") {
-                    leftHandData.add(landmarks)
-                } else if (handedness == "Left") {
-                    rightHandData.add(landmarks)
-                }
-            }
-        } else {
-            if (isCollectingData) {
-                isCollectingData = false
-                val combinedData = combineHandDataList()
-                Log.d("좌표값", "Combined Data: ${combinedData.joinToString()}")
-                Log.d("좌표값", "Left Hand Data Size: ${leftHandData.size}")
-                Log.d("좌표값", "Right Hand Data Size: ${rightHandData.size}")
-                clearHandData()
-            }
-        }
-
         handLandmarkerHelperListener?.onHandResults(
             ResultBundle(
                 listOf(result),
@@ -216,46 +183,11 @@ class HandLandmarkerHelper(
         )
     }
 
-    fun getLeftHandData(): List<List<Quadruple<Float, Float, Float, Float>>> = leftHandData
-    fun getRightHandData(): List<List<Quadruple<Float, Float, Float, Float>>> = rightHandData
-
-    private fun clearHandData() {
-        leftHandData.clear()
-        rightHandData.clear()
-    }
-
-    private fun combineHandDataList(): List<List<Float>> {
-        val combinedData = mutableListOf<List<Float>>()
-        val size = maxOf(leftHandData.size, rightHandData.size)
-        for (i in 0 until size) {
-            val leftData = if (i < leftHandData.size) leftHandData[i] else List(21) { Quadruple(0f, 0f, 0f, 0f) }
-            val rightData = if (i < rightHandData.size) rightHandData[i] else List(21) { Quadruple(0f, 0f, 0f, 0f) }
-            combinedData.add((leftData + rightData).flatMap { listOf(it.first, it.second, it.third,
-                it.fourth
-            ) })
-        }
-        return combinedData
-    }
-
     // 이 HandLandmarkerHelper의 호출자에게 감지 중 발생한 오류 반환
     private fun returnLivestreamError(error: RuntimeException) {
         handLandmarkerHelperListener?.onHandError(
             error.message ?: "알 수 없는 오류가 발생했습니다"
         )
-    }
-
-    companion object {
-        const val TAG = "HandLandmarkerHelper"
-        private const val MP_HAND_LANDMARKER_TASK = "hand_landmarker.task"
-
-        const val DELEGATE_CPU = 0
-        const val DELEGATE_GPU = 1
-        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
-        const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
-        const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
-        const val DEFAULT_NUM_HANDS = 2
-        const val OTHER_ERROR = 0
-        const val GPU_ERROR = 1
     }
 
     data class ResultBundle(
@@ -270,23 +202,17 @@ class HandLandmarkerHelper(
         fun onHandResults(resultBundle: ResultBundle)
     }
 
-    // x, y, z 좌표와 가시성 정보를 저장하는 데이터 클래스
-    data class Quadruple<A, B, C, D>(
-        val first: A,
-        val second: B,
-        val third: C,
-        val fourth: D
-    )
+    companion object {
+        const val TAG = "HandLandmarkerHelper"
+        private const val MP_HAND_LANDMARKER_TASK = "hand_landmarker.task"
 
-    // 각도 처리
-
-
-    // 가시성 정보 처리
-    private fun setVisibility(x: Float, y: Float, epsilon: Float = 1e-6f): Float {
-        return when {
-            x <= epsilon && y <= epsilon -> 0f
-            x <= epsilon || y <= epsilon -> 0.5f
-            else -> 1f
-        }
+        const val DELEGATE_CPU = 0
+        const val DELEGATE_GPU = 1
+        const val DEFAULT_HAND_DETECTION_CONFIDENCE = 0.5F
+        const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
+        const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
+        const val DEFAULT_NUM_HANDS = 2
+        const val OTHER_ERROR = 0
+        const val GPU_ERROR = 1
     }
 }

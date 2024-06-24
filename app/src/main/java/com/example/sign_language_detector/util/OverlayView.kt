@@ -13,6 +13,7 @@ import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarker
 import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarker
 import com.google.mediapipe.tasks.vision.poselandmarker.PoseLandmarkerResult
+import dagger.hilt.android.AndroidEntryPoint
 import kotlin.math.max
 import kotlin.math.min
 
@@ -51,7 +52,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         super.draw(canvas)
         result.let { handLandmarkerResult ->
             handLandmarkerResult.landmarks().forEachIndexed { index, landmark ->
-                val handedness = handLandmarkerResult.handednesses()[index].first().categoryName()
+                val handedness = handLandmarkerResult.handedness()[index].first().categoryName()
                 // 왼손 -> GREEN, 오른손 -> YELLOW 로 고려
                 val lineColor = if (handedness == "Right") Color.GREEN else Color.YELLOW
                 val linePaint = Paint().apply {

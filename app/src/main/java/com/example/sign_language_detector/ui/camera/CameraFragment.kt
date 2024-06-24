@@ -12,41 +12,40 @@ import androidx.camera.core.AspectRatio
 import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.ImageProxy
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.ui.permissions.PermissionsFragment
+import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.google.mediapipe.tasks.vision.core.RunningMode
+import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
 class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     PoseLandmarkerHelper.LandmarkerListener {
-
-    companion object {
-        private const val TAG = "Landmarker"
-    }
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
 
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
-    private val viewModel: CameraViewModel by activityViewModels()
+    private lateinit var viewModel: CameraViewModel
 
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
-    private lateinit var landmarkProcessor: LandmarkProcessor
+
     private var preview: Preview? = null
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
@@ -126,6 +125,15 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             currentDelegate = 0,
             poseLandmarkerHelperListener = this@CameraFragment
         )
+
+        // ViewModel 초기화
+        val detectUseCase = DetectUseCase(
+            handLandmarkerHelper = handLandmarkerHelper,
+            poseLandmarkerHelper = poseLandmarkerHelper,
+            executor = backgroundExecutor
+        )
+        val factory = CameraViewModelFactory(detectUseCase)
+        viewModel = ViewModelProvider(this, factory).get(CameraViewModel::class.java)
 
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
@@ -225,6 +233,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
+                viewModel.processLandmarks(resultBundle, PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0, 0))
             }
         }
     }
@@ -242,6 +251,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
+                viewModel.processLandmarks(HandLandmarkerHelper.ResultBundle(emptyList(), 0, 0, 0), resultBundle)
             }
         }
     }
@@ -256,5 +266,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
+    }
+
+    companion object {
+        private const val TAG = "Landmarker"
     }
 }

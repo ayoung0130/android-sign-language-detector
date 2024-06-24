@@ -1,87 +1,223 @@
 package com.example.sign_language_detector.util
 
-import android.content.Context
+import android.util.Log
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
+import com.example.sign_language_detector.repository.PoseLandmarkerHelper
+import kotlin.math.acos
+import kotlin.math.sqrt
 
-class LandmarkProcessor(context: Context) {
+class LandmarkProcessor {
 
-//    private val tflite: Interpreter
-    private val seqLength = 30
+    private val combinedData = mutableListOf<List<Float>>()
+    private var isCollectingData = false
 
-//    init {
-//        val model = loadModelFile(context, "sign_language_detect_model.tflite")
-//        tflite = Interpreter(model)
-//    }
-//
-//    private fun loadModelFile(context: Context, modelFileName: String): ByteBuffer {
-//        val fileDescriptor = context.assets.openFd(modelFileName)
-//        val inputStream = fileDescriptor.createInputStream()
-//        val byteBuffer = ByteBuffer.allocateDirect(fileDescriptor.declaredLength.toInt())
-//        byteBuffer.order(ByteOrder.nativeOrder())
-//        inputStream.channel.read(byteBuffer)
-//        inputStream.close()
-//        byteBuffer.position(0)
-//        return byteBuffer
-//    }
+    private val poseLandmarkIndices = listOf(
+        0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
+    )
 
-    fun processLandmarks(landmarkData: List<List<HandLandmarkerHelper.Quadruple<Float, Float, Float, Float>>>) {
-//        if (landmarkData.isEmpty()) return "수어 동작을 시작하세요"
+    fun processLandmarks(
+        resultHandBundle: HandLandmarkerHelper.ResultBundle,
+        resultPoseBundle: PoseLandmarkerHelper.ResultBundle,
+    ) {
+        Log.d("Landmark", "resultHandBundle.results: ${resultHandBundle.results}")
 
-        val numFrames = landmarkData.size
-        val numLandmarks = landmarkData[0].size
-        val inputArray = Array(numFrames) {
-            FloatArray(numLandmarks * 4) // x, y, z, visibility
+        // 손 랜드마크 처리
+        if (resultHandBundle.results.isNotEmpty()) {
+
+            val jointLeftHands = Array(21) { FloatArray(4) }
+            val jointRightHands = Array(21) { FloatArray(4) }
+            val jointPose = Array(21) { FloatArray(4) }
+
+            isCollectingData = true
+
+            resultHandBundle.results.forEach { result ->
+                result.landmarks().forEachIndexed { i, hand ->
+                    hand.forEachIndexed { j, lm ->
+                        val visibility = setVisibility(lm.x(), lm.y())
+                        if (result.handedness()[i].first().categoryName() == "Left") {
+                            jointRightHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z(), visibility)
+                        } else {
+                            jointLeftHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z(), visibility)
+                        }
+                    }
+                }
+            }
+
+            // 포즈 랜드마크 처리
+            resultPoseBundle.results.forEach { result ->
+                result.landmarks().forEachIndexed { i, pose ->
+                    pose.forEachIndexed { j, lm ->
+                        if (i in poseLandmarkIndices) {
+                            jointPose[poseLandmarkIndices.indexOf(j)] = floatArrayOf(
+                                lm.x(), lm.y(), lm.z(), lm.visibility().orElse(0.0f)
+                            )
+                        }
+                    }
+                }
+            }
+
+            // 모든 랜드마크 합치기
+            val joint =
+                jointLeftHands.flatMap { it.toList() } + jointRightHands.flatMap { it.toList() } + jointPose.flatMap { it.toList() }
+
+            val leftHandAngles = angleHands(jointLeftHands)
+            val rightHandAngles = angleHands(jointRightHands)
+            val poseAngles = anglePose(jointPose)
+
+            // 각도 계산 추가
+            val combined =
+                joint + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()
+
+            combinedData.add(combined)
+
+        } else {
+            if (isCollectingData) {
+                isCollectingData = false
+//                Log.d("Landmark", "Combined Data Size: ${combinedData.size}")
+//                combinedData.forEachIndexed { index, data ->
+//                    Log.d("Landmark", "Frame $index: $data")
+//                }
+
+                clearData()
+            }
         }
+    }
 
-        for (i in landmarkData.indices) {
-            for (j in landmarkData[i].indices) {
-                val landmark = landmarkData[i][j]
-                inputArray[i][j * 4] = landmark.first
-                inputArray[i][j * 4 + 1] = landmark.second
-                inputArray[i][j * 4 + 2] = landmark.third
-                inputArray[i][j * 4 + 3] = landmark.fourth
+    fun getLandmarkData(): List<List<Float>> = combinedData
+
+    private fun clearData() {
+        combinedData.clear()
+    }
+
+    // 각도 처리
+    private fun angleHands(jointHands: Array<FloatArray>): FloatArray {
+        val v1 = arrayOf(
+            jointHands[0], jointHands[1], jointHands[2], jointHands[3],
+            jointHands[0], jointHands[5], jointHands[6], jointHands[7],
+            jointHands[0], jointHands[9], jointHands[10], jointHands[11],
+            jointHands[0], jointHands[13], jointHands[14], jointHands[15],
+            jointHands[0], jointHands[17], jointHands[18], jointHands[19]
+        )
+        val v2 = arrayOf(
+            jointHands[1], jointHands[2], jointHands[3], jointHands[4],
+            jointHands[5], jointHands[6], jointHands[7], jointHands[8],
+            jointHands[9], jointHands[10], jointHands[11], jointHands[12],
+            jointHands[13], jointHands[14], jointHands[15], jointHands[16],
+            jointHands[17], jointHands[18], jointHands[19], jointHands[20]
+        )
+
+        val v = Array(20) { FloatArray(3) }
+        for (i in v.indices) {
+            for (j in 0..2) {
+                v[i][j] = v2[i][j] - v1[i][j]
             }
         }
 
-        val fullSeqData = mutableListOf<Array<FloatArray>>()
-        for (seq in 0..(inputArray.size - seqLength) step 10) {
-            fullSeqData.add(inputArray.sliceArray(seq until (seq + seqLength)))
+        val normV = FloatArray(20) { 0f }
+        for (i in v.indices) {
+            normV[i] = sqrt(v[i][0] * v[i][0] + v[i][1] * v[i][1] + v[i][2] * v[i][2])
         }
 
-//        val inputBuffer = ByteBuffer.allocateDirect(fullSeqData.size * seqLength * numLandmarks * 4 * 4).apply {
-//            order(ByteOrder.nativeOrder())
-//        }
+        return if (normV.all { it == 0f }) {
+            FloatArray(15)
+        } else {
+            for (i in v.indices) {
+                if (normV[i] != 0f) {
+                    for (j in 0..2) {
+                        v[i][j] /= normV[i]
+                    }
+                }
+            }
 
-//        for (sequence in fullSeqData) {
-//            for (frame in sequence) {
-//                for (value in frame) {
-//                    inputBuffer.putFloat(value)
-//                }
-//            }
-//        }
+            val dotProduct = FloatArray(15)
+            for (i in dotProduct.indices) {
+                dotProduct[i] =
+                    (v[i][0] * v[i + 1][0] + v[i][1] * v[i + 1][1] + v[i][2] * v[i + 1][2])
+                        .coerceIn(-1.0f, 1.0f)
+            }
 
-//        val outputBuffer = ByteBuffer.allocateDirect(fullSeqData.size * 4).apply {
-//            order(ByteOrder.nativeOrder())
-//        }
-//
-//        tflite.run(inputBuffer, outputBuffer)
-//        inputBuffer.clear()
-
-//        outputBuffer.rewind()
-//        val yPred = FloatArray(fullSeqData.size * 4)
-//        outputBuffer.asFloatBuffer().get(yPred)
-
-//        val predictedClasses = yPred.indices
-//            .filter { it % 4 == 0 }
-//            .map { yPred.copyOfRange(it, it + 4) }
-//            .map { it -> it.withIndex().maxByOrNull { it.value }?.index ?: -1 }
-//
-//        val finalPrediction = predictedClasses.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key ?: -1
-//
-//        return if (finalPrediction != -1) actions[finalPrediction] else "수어 동작을 시작하세요"
+            val angle = FloatArray(15)
+            for (i in angle.indices) {
+                angle[i] = acos(dotProduct[i])
+            }
+            angle
+        }
     }
 
-    companion object {
-        val actions = arrayOf("액션1", "액션2", "액션3") // 예시로 사용할 액션 이름들
+    private fun anglePose(jointPose: Array<FloatArray>): FloatArray {
+        val v1 = arrayOf(
+            jointPose[0], jointPose[0], jointPose[0], jointPose[0], jointPose[0], jointPose[0],
+            jointPose[7], jointPose[8], jointPose[9], jointPose[10], jointPose[13], jointPose[14],
+            jointPose[0], jointPose[0], jointPose[5], jointPose[6], jointPose[0], jointPose[0],
+            jointPose[17], jointPose[18]
+        )
+        val v2 = arrayOf(
+            jointPose[1],
+            jointPose[2],
+            jointPose[3],
+            jointPose[4],
+            jointPose[5],
+            jointPose[6],
+            jointPose[5],
+            jointPose[6],
+            jointPose[7],
+            jointPose[8],
+            jointPose[9],
+            jointPose[10],
+            jointPose[17],
+            jointPose[18],
+            jointPose[17],
+            jointPose[18],
+            jointPose[19],
+            jointPose[20],
+            jointPose[19],
+            jointPose[20]
+        )
+
+        val v = Array(20) { FloatArray(3) }
+        for (i in v.indices) {
+            for (j in 0..2) {
+                v[i][j] = v2[i][j] - v1[i][j]
+            }
+        }
+
+        val normV = FloatArray(20) { 0f }
+        for (i in v.indices) {
+            normV[i] = sqrt(v[i][0] * v[i][0] + v[i][1] * v[i][1] + v[i][2] * v[i][2])
+        }
+
+        return if (normV.all { it == 0f }) {
+            FloatArray(15)
+        } else {
+            for (i in v.indices) {
+                if (normV[i] != 0f) {
+                    for (j in 0..2) {
+                        v[i][j] /= normV[i]
+                    }
+                }
+            }
+
+            val dotProduct = FloatArray(15)
+            for (i in dotProduct.indices) {
+                dotProduct[i] =
+                    (v[i][0] * v[i + 1][0] + v[i][1] * v[i + 1][1] + v[i][2] * v[i + 1][2])
+                        .coerceIn(-1.0f, 1.0f)
+            }
+
+            val angle = FloatArray(15)
+            for (i in angle.indices) {
+                angle[i] = acos(dotProduct[i])
+            }
+            angle
+        }
+    }
+
+    // Hand 가시성 정보 처리
+    private fun setVisibility(x: Float, y: Float, epsilon: Float = 1e-6f): Float {
+        return when {
+            x <= epsilon && y <= epsilon -> 0f
+            x <= epsilon || y <= epsilon -> 0.5f
+            else -> 1f
+        }
     }
 }

@@ -6,6 +6,8 @@ import androidx.navigation.fragment.NavHostFragment
 import androidx.navigation.ui.setupWithNavController
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.ActivityMainBinding
+import com.example.sign_language_detector.util.LandmarkProcessor
+import dagger.hilt.android.AndroidEntryPoint
 
 class MainActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMainBinding
