@@ -5,23 +5,32 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.sign_language_detector.databinding.FragmentQuestionsBinding
 
 class QuestionsFragment : Fragment() {
 
-    private var _fragmentQuestionsBinding: FragmentQuestionsBinding? = null
-    private val fragmentQuestionsBinding
-        get() = _fragmentQuestionsBinding!!
+    private lateinit var viewModel: QuestionsViewModel
+    private lateinit var binding: FragmentQuestionsBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _fragmentQuestionsBinding =
-            FragmentQuestionsBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this)[QuestionsViewModel::class.java]
 
-        return fragmentQuestionsBinding.root
+        binding = FragmentQuestionsBinding.inflate(inflater, container, false).apply {
+            viewModel = this@QuestionsFragment.viewModel
+            lifecycleOwner = viewLifecycleOwner
+        }
+
+        // ViewModel의 navigateBack 콜백 설정
+        viewModel.navigateBack = {
+            findNavController().popBackStack()
+        }
+
+        return binding.root
     }
-
 }

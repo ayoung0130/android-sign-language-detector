@@ -42,10 +42,10 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         super.onCreate(savedInstanceState)
 
         if (hasPermissions(requireContext())) {
-            // 권한이 이미 있는 경우 2초 후 HomeFragment로 이동
+            // 권한이 이미 있는 경우 1.5초 후 HomeFragment로 이동
             Handler(Looper.getMainLooper()).postDelayed({
                 navigateToHome()
-            }, 2000)
+            }, 1500)
         } else {
             // 권한이 없는 경우 권한을 요청
             requestPermissionLauncher.launch(

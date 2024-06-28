@@ -20,6 +20,7 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
@@ -95,6 +96,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         _fragmentCameraBinding =
             FragmentCameraBinding.inflate(inflater, container, false)
 
+//        viewModel.navigateBack = {
+//            findNavController().popBackStack()
+//        }
+
         return fragmentCameraBinding.root
     }
 
@@ -143,9 +148,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         }
 
         // 모델 예측 관찰
-        viewModel.predictedWord.observe(viewLifecycleOwner) {
-            fragmentCameraBinding.predict?.text
-        }
+//        viewModel.predictedWord.observe(viewLifecycleOwner) {
+//            fragmentCameraBinding.predict?.text
+//        }
     }
 
     // CameraX 초기화 및 카메라 사용 사례 준비

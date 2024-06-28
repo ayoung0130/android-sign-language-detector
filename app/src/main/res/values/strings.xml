@@ -2,14 +2,16 @@
 <resources>
     <string name="app_name">손말</string>
 
-    <string name="media_pipe">MediaPipe</string>
-
-    <string name="home_title_text">오늘도 당신과\n건강을 소통합니다</string>
+    <string name="home_title_text">딥러닝을 활용한\n실시간 수어 통역기</string>
     <string name="home_choice_question">질문 선택하기</string>
     <string name="home_start_translate">수어 통역 시작</string>
 
-    <string name="menu_camera">카메라</string>
-    <string name="menu_gallery">질문</string>
-    <string name="question">질문 리스트 추가 예정.</string>
+    <string name="back_button">뒤로가기</string>
+
+    <string name="select_question">질문 선택하기</string>
+    <string name="select_question_explain">아래 질문 중 하나를 선택해 주세요\n질문 선택시 수어 통역 화면으로 넘어갑니다</string>
+    <string name="check_symptom">증상 확인</string>
+    <string name="diagnosis_examination">진단 및 검사</string>
+
     <string name="predict">수어 동작을 시작하세요</string>
 </resources>

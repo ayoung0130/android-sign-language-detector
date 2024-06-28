@@ -17,6 +17,8 @@ class CameraViewModel(
     private val modelPredictProcessor: ModelPredictProcessor
 ) : ViewModel() {
 
+//    var navigateBack: (() -> Unit)? = null
+
     private val _predictedWord = MutableLiveData<String>()
     val predictedWord: LiveData<String> get() = _predictedWord
 
@@ -37,6 +39,10 @@ class CameraViewModel(
         val prediction = modelPredictProcessor.predict(data)
         updatePredictedWord(prediction)
     }
+
+//    fun onBackButtonClick() {
+//        navigateBack?.invoke()
+//    }
 
     private fun updatePredictedWord(word: String) {
         _predictedWord.postValue(word)
