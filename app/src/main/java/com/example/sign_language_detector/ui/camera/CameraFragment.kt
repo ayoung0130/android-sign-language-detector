@@ -24,7 +24,7 @@ import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
-import com.example.sign_language_detector.ui.permissions.PermissionsFragment
+import com.example.sign_language_detector.ui.splash.SplashFragment
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
@@ -59,10 +59,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     override fun onResume() {
         super.onResume()
         // 모든 권한이 여전히 존재하는지 확인, 사용자가 앱이 일시 중지된 동안 이를 제거할 수 있음
-        if (!PermissionsFragment.hasPermissions(requireContext())) {
+        if (!SplashFragment.hasPermissions(requireContext())) {
             Navigation.findNavController(
                 requireActivity(), R.id.fragment_container
-            ).navigate(R.id.action_camera_to_permissions)
+            ).navigate(R.id.action_splash_to_home)
         }
 
         // 사용자가 전면으로 돌아올 때 HandLandmarkerHelper를 다시 시작

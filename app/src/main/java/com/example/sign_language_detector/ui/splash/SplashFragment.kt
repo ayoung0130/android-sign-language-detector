@@ -1,21 +1,22 @@
-package com.example.sign_language_detector.ui.permissions
+package com.example.sign_language_detector.ui.splash
 
 import android.Manifest
 import android.content.Context
 import android.content.pm.PackageManager
 import android.os.Bundle
+import android.os.Handler
+import android.os.Looper
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.sign_language_detector.R
-import dagger.hilt.android.AndroidEntryPoint
 
 private val PERMISSIONS_REQUIRED = arrayOf(Manifest.permission.CAMERA)
 
-class PermissionsFragment : Fragment() {
+class SplashFragment : Fragment(R.layout.fragment_splash) {
 
     private val requestPermissionLauncher =
         registerForActivityResult(
@@ -27,7 +28,7 @@ class PermissionsFragment : Fragment() {
                     "Permission request granted",
                     Toast.LENGTH_LONG
                 ).show()
-                navigateToCamera()
+                navigateToHome()
             } else {
                 Toast.makeText(
                     context,
@@ -39,29 +40,23 @@ class PermissionsFragment : Fragment() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        when (PackageManager.PERMISSION_GRANTED) {
-            ContextCompat.checkSelfPermission(
-                requireContext(),
+
+        if (hasPermissions(requireContext())) {
+            // 권한이 이미 있는 경우 2초 후 HomeFragment로 이동
+            Handler(Looper.getMainLooper()).postDelayed({
+                navigateToHome()
+            }, 2000)
+        } else {
+            // 권한이 없는 경우 권한을 요청
+            requestPermissionLauncher.launch(
                 Manifest.permission.CAMERA
-            ) -> {
-                navigateToCamera()
-            }
-            else -> {
-                requestPermissionLauncher.launch(
-                    Manifest.permission.CAMERA
-                )
-            }
+            )
         }
     }
 
-    private fun navigateToCamera() {
+    private fun navigateToHome() {
         lifecycleScope.launchWhenStarted {
-            Navigation.findNavController(
-                requireActivity(),
-                R.id.fragment_container
-            ).navigate(
-                R.id.action_permissions_to_camera
-            )
+            findNavController().navigate(R.id.action_splash_to_home)
         }
     }
 
