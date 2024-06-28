@@ -4,23 +4,36 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.ViewModelProvider
+import androidx.navigation.fragment.findNavController
+import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentHomeBinding
 
 class HomeFragment : Fragment() {
 
-    private var _fragmentHomeBinding: FragmentHomeBinding? = null
-    private val fragmentHomeBinding
-        get() = _fragmentHomeBinding!!
+    private lateinit var viewModel: HomeViewModel
+    private lateinit var binding: FragmentHomeBinding
 
     override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
+        inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _fragmentHomeBinding =
-            FragmentHomeBinding.inflate(inflater, container, false)
+        viewModel = ViewModelProvider(this)[HomeViewModel::class.java]
 
-        return fragmentHomeBinding.root
+        binding = DataBindingUtil.inflate(inflater, R.layout.fragment_home, container, false)
+        binding.viewModel = viewModel
+        binding.lifecycleOwner = viewLifecycleOwner
+
+        viewModel.navigateToQuestions = {
+            findNavController().navigate(R.id.action_home_to_questions)
+        }
+
+        viewModel.navigateToCamera = {
+            findNavController().navigate(R.id.action_home_to_camera)
+        }
+
+        return binding.root
     }
 }

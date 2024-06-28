@@ -28,22 +28,4 @@
         android:text="@string/predict"
         android:textColor="@android:color/black"
         android:textSize="25sp" />
-
-    <ImageView
-        android:id="@+id/media_pipe_banner"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
-        android:layout_marginStart="8dp"
-        android:layout_marginBottom="35dp"
-        android:src="@drawable/media_pipe_banner" />
-
-    <ImageView
-        android:id="@+id/openai_badge"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="start|bottom"
-        android:layout_margin="8dp"
-        android:src="@drawable/powered_by_openai_badge" />
-
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

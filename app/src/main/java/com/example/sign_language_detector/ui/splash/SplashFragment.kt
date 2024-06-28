@@ -25,15 +25,15 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
             if (isGranted) {
                 Toast.makeText(
                     context,
-                    "Permission request granted",
-                    Toast.LENGTH_LONG
+                    "카메라 권한이 허용되었습니다",
+                    Toast.LENGTH_SHORT
                 ).show()
                 navigateToHome()
             } else {
                 Toast.makeText(
                     context,
-                    "Permission request denied",
-                    Toast.LENGTH_LONG
+                    "카메라 권한이 거부되었습니다",
+                    Toast.LENGTH_SHORT
                 ).show()
             }
         }

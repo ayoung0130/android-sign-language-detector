@@ -1,87 +1,122 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/light_beige"
-    android:padding="16dp">
+<layout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <!-- 상단 로고 이미지 -->
-    <ImageView
-        android:id="@+id/logo_image"
-        android:layout_width="96dp"
-        android:layout_height="47dp"
-        android:layout_marginTop="16dp"
-        android:src="@drawable/home_app_name"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+    <data>
 
-    <!-- 의료시설용 텍스트 -->
-    <ImageView
-        android:id="@+id/for_medical"
-        android:layout_width="109dp"
-        android:layout_height="55dp"
-        android:src="@drawable/home_for_medical"
-        app:layout_constraintBottom_toTopOf="@+id/title_text"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.987"
-        app:layout_constraintStart_toEndOf="@+id/logo_image"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.826" />
+        <variable
+            name="viewModel"
+            type="com.example.sign_language_detector.ui.home.HomeViewModel" />
+    </data>
 
-    <!-- 타이틀 텍스트 -->
-    <TextView
-        android:id="@+id/title_text"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="16dp"
-        android:padding="16dp"
-        android:text="@string/home_title_text"
-        android:textColor="#000000"
-        android:textSize="24sp"
-        android:textStyle="bold"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/logo_image" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:background="@color/light_beige"
+        android:padding="16dp">
 
-    <!-- 중간 이미지 -->
-    <ImageView
-        android:id="@+id/center_image"
-        android:layout_width="400dp"
-        android:layout_height="180dp"
-        android:src="@drawable/home_center_image"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/title_text" />
+        <!-- 상단 로고 이미지 -->
+        <ImageView
+            android:id="@+id/logo_image"
+            android:layout_width="96dp"
+            android:layout_height="47dp"
+            android:layout_marginTop="16dp"
+            android:src="@drawable/home_app_name"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
-    <!-- 질문 선택하기 이미지 버튼 -->
-    <ImageButton
-        android:id="@+id/question_button"
-        android:layout_width="160dp"
-        android:layout_height="250dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="50dp"
-        android:background="@null"
-        android:contentDescription="@string/home_choice_question"
-        android:scaleType="fitCenter"
-        android:src="@drawable/home_choice_question"
-        app:layout_constraintEnd_toStartOf="@+id/translation_button"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/center_image" />
+        <!-- 의료시설용 텍스트 -->
+        <ImageView
+            android:id="@+id/for_medical"
+            android:layout_width="109dp"
+            android:layout_height="55dp"
+            android:src="@drawable/home_for_medical"
+            app:layout_constraintBottom_toTopOf="@+id/title_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.987"
+            app:layout_constraintStart_toEndOf="@+id/logo_image"
+            app:layout_constraintTop_toTopOf="parent"
+            app:layout_constraintVertical_bias="0.826" />
 
-    <!-- 수어 통역 시작 이미지 버튼 -->
-    <ImageButton
-        android:id="@+id/translation_button"
-        android:layout_width="160dp"
-        android:layout_height="250dp"
-        android:layout_marginTop="50dp"
-        android:layout_marginEnd="8dp"
-        android:background="@null"
-        android:contentDescription="@string/home_start_translate"
-        android:scaleType="fitCenter"
-        android:src="@drawable/home_start_translate"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/question_button"
-        app:layout_constraintTop_toBottomOf="@+id/center_image" />
+        <!-- 타이틀 텍스트 -->
+        <TextView
+            android:id="@+id/title_text"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:padding="16dp"
+            android:text="@string/home_title_text"
+            android:textColor="#000000"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/logo_image" />
 
-</androidx.constraintlayout.widget.ConstraintLayout>
+        <!-- 중간 이미지 -->
+        <ImageView
+            android:id="@+id/center_image"
+            android:layout_width="400dp"
+            android:layout_height="180dp"
+            android:src="@drawable/home_center_image"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/title_text" />
+
+        <!-- 질문 선택하기 이미지 버튼 -->
+        <ImageButton
+            android:id="@+id/question_button"
+            android:layout_width="170dp"
+            android:layout_height="280dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="5dp"
+            android:background="@null"
+            android:contentDescription="@string/home_choice_question"
+            android:onClick="@{()-> viewModel.onQuestionButtonClick()}"
+            android:scaleType="fitCenter"
+            android:src="@drawable/home_choice_question"
+            app:layout_constraintEnd_toStartOf="@+id/translation_button"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/center_image" />
+
+        <!-- 수어 통역 시작 이미지 버튼 -->
+        <ImageButton
+            android:id="@+id/translation_button"
+            android:layout_width="170dp"
+            android:layout_height="280dp"
+            android:layout_marginStart="5dp"
+            android:layout_marginTop="40dp"
+            android:layout_marginEnd="8dp"
+            android:background="@null"
+            android:contentDescription="@string/home_start_translate"
+            android:onClick="@{()-> viewModel.onTranslationButtonClick()}"
+            android:scaleType="fitCenter"
+            android:src="@drawable/home_start_translate"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/question_button"
+            app:layout_constraintTop_toBottomOf="@+id/center_image" />
+
+        <ImageView
+            android:id="@+id/media_pipe_banner"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/media_pipe_banner"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/openai_badge"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/question_button" />
+
+        <ImageView
+            android:id="@+id/openai_badge"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:src="@drawable/powered_by_openai_badge"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@+id/media_pipe_banner"
+            app:layout_constraintTop_toBottomOf="@+id/translation_button" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+</layout>
