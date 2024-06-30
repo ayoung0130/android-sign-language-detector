@@ -1,16 +1,15 @@
 package com.example.sign_language_detector.ui.camera
 
-import android.util.Log
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.navigation.NavController
+import com.example.sign_language_detector.R
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.ModelPredictProcessor
-import dagger.hilt.android.lifecycle.HiltViewModel
-import javax.inject.Inject
 
 class CameraViewModel(
     private val detectUseCase: DetectUseCase,
@@ -39,10 +38,6 @@ class CameraViewModel(
         val prediction = modelPredictProcessor.predict(data)
         updatePredictedWord(prediction)
     }
-
-//    fun onBackButtonClick() {
-//        navigateBack?.invoke()
-//    }
 
     private fun updatePredictedWord(word: String) {
         _predictedWord.postValue(word)

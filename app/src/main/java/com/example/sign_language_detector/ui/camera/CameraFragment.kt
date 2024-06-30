@@ -1,7 +1,6 @@
 package com.example.sign_language_detector.ui.camera
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.content.res.Configuration
 import android.os.Bundle
 import android.util.Log
@@ -17,24 +16,19 @@ import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
-import androidx.navigation.fragment.findNavController
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.ui.splash.SplashFragment
 import com.example.sign_language_detector.usecase.DetectUseCase
-import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
 import com.google.mediapipe.tasks.vision.core.RunningMode
-import dagger.hilt.android.AndroidEntryPoint
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import javax.inject.Inject
 
 class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     PoseLandmarkerHelper.LandmarkerListener {

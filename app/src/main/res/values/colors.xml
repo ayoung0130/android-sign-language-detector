@@ -4,6 +4,8 @@
     <color name="beige">#E7E1D3</color>
     <color name="deep_beige">#DCD3C2</color>
     <color name="green">#6CAB9A</color>
+    <color name="light_black">#1F201A</color>
+    <color name="deep_green">#01725E</color>
     
     <color name="mp_color_primary">#007F8B</color>
     <color name="mp_color_primary_variant">#12B5CB</color>
