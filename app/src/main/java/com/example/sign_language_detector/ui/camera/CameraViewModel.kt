@@ -4,8 +4,6 @@ import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import androidx.navigation.NavController
-import com.example.sign_language_detector.R
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase

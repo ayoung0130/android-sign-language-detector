@@ -238,7 +238,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
-                viewModel.processLandmarks(resultBundle, PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0))
+                viewModel.processLandmarks(
+                    resultBundle,
+                    PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0)
+                )
             }
         }
     }
@@ -256,7 +259,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
-                viewModel.processLandmarks(HandLandmarkerHelper.ResultBundle(emptyList(), 0, 0), resultBundle)
+                viewModel.processLandmarks(
+                    HandLandmarkerHelper.ResultBundle(emptyList(), 0, 0),
+                    resultBundle
+                )
             }
         }
     }
