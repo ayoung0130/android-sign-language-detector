@@ -48,6 +48,7 @@ class DetectUseCase(
     }
 
     fun getProcessedData(): List<List<Float>> {
+        Log.d("Landmark", "${landmarkProcessor.getLandmarkData()}")
         return landmarkProcessor.getLandmarkData()
     }
 }
