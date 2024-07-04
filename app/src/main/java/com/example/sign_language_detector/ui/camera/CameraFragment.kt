@@ -24,6 +24,7 @@ import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.ui.splash.SplashFragment
 import com.example.sign_language_detector.usecase.DetectUseCase
+import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
@@ -41,6 +42,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private lateinit var viewModel: CameraViewModel
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
+    private lateinit var landmarkProcessor: LandmarkProcessor
     private var preview: Preview? = null
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
@@ -131,8 +133,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             poseLandmarkerHelper = poseLandmarkerHelper,
             executor = backgroundExecutor
         )
+        val landmarkProcessor = LandmarkProcessor()
         val modelPredictProcessor = ModelPredictProcessor(requireContext())
-        val factory = CameraViewModelFactory(detectUseCase, modelPredictProcessor)
+        val factory = CameraViewModelFactory(detectUseCase, landmarkProcessor, modelPredictProcessor)
         viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
 
         // 뷰가 제대로 배치될 때까지 대기

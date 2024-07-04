@@ -7,14 +7,14 @@ import androidx.lifecycle.ViewModel
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase
+import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
 
 class CameraViewModel(
     private val detectUseCase: DetectUseCase,
+    private val landmarkProcessor: LandmarkProcessor,
     private val modelPredictProcessor: ModelPredictProcessor
 ) : ViewModel() {
-
-//    var navigateBack: (() -> Unit)? = null
 
     private val _predictedWord = MutableLiveData<String>()
     val predictedWord: LiveData<String> get() = _predictedWord
@@ -31,8 +31,8 @@ class CameraViewModel(
         resultHandBundles: HandLandmarkerHelper.ResultBundle,
         resultPoseBundles: PoseLandmarkerHelper.ResultBundle
     ) {
-        detectUseCase.processLandmarks(resultHandBundles, resultPoseBundles)
-        val data = detectUseCase.getProcessedData()
+        landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles)
+        val data = landmarkProcessor.getLandmarkData()
         val prediction = modelPredictProcessor.predict(data)
         updatePredictedWord(prediction)
     }

@@ -1,5 +1,6 @@
 package com.example.sign_language_detector.util
 
+import android.util.Log
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import kotlin.math.acos
@@ -76,6 +77,7 @@ class LandmarkProcessor {
     }
 
     fun getLandmarkData(): List<List<Float>> {
+        Log.d("Landmark", "$combinedData")
         return combinedData
     }
 

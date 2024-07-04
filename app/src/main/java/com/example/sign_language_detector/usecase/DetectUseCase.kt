@@ -13,8 +13,6 @@ class DetectUseCase(
     private val executor: ExecutorService
 ) {
 
-    private val landmarkProcessor = LandmarkProcessor()
-
     fun detectHand(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         executor.execute {
             try {
@@ -39,16 +37,5 @@ class DetectUseCase(
                 Log.e("DetectPoseUseCase", "Pose detection failed", e)
             }
         }
-    }
-
-    fun processLandmarks(resultHandBundle: HandLandmarkerHelper.ResultBundle, resultPoseBundle: PoseLandmarkerHelper.ResultBundle) {
-        executor.execute {
-            landmarkProcessor.processLandmarks(resultHandBundle, resultPoseBundle)
-        }
-    }
-
-    fun getProcessedData(): List<List<Float>> {
-        Log.d("Landmark", "${landmarkProcessor.getLandmarkData()}")
-        return landmarkProcessor.getLandmarkData()
     }
 }
