@@ -92,10 +92,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         _fragmentCameraBinding =
             FragmentCameraBinding.inflate(inflater, container, false)
 
-//        viewModel.navigateBack = {
-//            findNavController().popBackStack()
-//        }
-
         return fragmentCameraBinding.root
     }
 
@@ -138,16 +134,15 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         val factory = CameraViewModelFactory(detectUseCase, landmarkProcessor, modelPredictProcessor)
         viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
 
+        fragmentCameraBinding.viewModel = viewModel
+        fragmentCameraBinding.lifecycleOwner = viewLifecycleOwner
+
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
             // 카메라와 그 사용 사례를 설정
             setUpCamera()
         }
 
-        // 모델 예측 관찰
-//        viewModel.predictedWord.observe(viewLifecycleOwner) {
-//            fragmentCameraBinding.predict?.text
-//        }
     }
 
     // CameraX 초기화 및 카메라 사용 사례 준비

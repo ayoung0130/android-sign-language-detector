@@ -142,32 +142,32 @@ class LandmarkProcessor {
 
     private fun anglePose(jointPose: Array<FloatArray>): FloatArray {
         val v1 = arrayOf(
-            jointPose[0], jointPose[0], jointPose[0], jointPose[0], jointPose[0], jointPose[0],
-            jointPose[7], jointPose[8], jointPose[9], jointPose[10], jointPose[13], jointPose[14],
-            jointPose[0], jointPose[0], jointPose[5], jointPose[6], jointPose[0], jointPose[0],
-            jointPose[17], jointPose[18]
+            jointPose[0], jointPose[2], jointPose[0], jointPose[1], jointPose[0], jointPose[0],
+            jointPose[7], jointPose[8], jointPose[8], jointPose[8], jointPose[10], jointPose[12],
+            jointPose[12], jointPose[12], jointPose[7], jointPose[7], jointPose[9], jointPose[11],
+            jointPose[11], jointPose[11]
         )
         val v2 = arrayOf(
-            jointPose[1],
             jointPose[2],
-            jointPose[3],
             jointPose[4],
+            jointPose[1],
+            jointPose[3],
             jointPose[5],
             jointPose[6],
-            jointPose[5],
-            jointPose[6],
-            jointPose[7],
             jointPose[8],
-            jointPose[9],
+            jointPose[7],
             jointPose[10],
-            jointPose[17],
-            jointPose[18],
-            jointPose[17],
-            jointPose[18],
-            jointPose[19],
             jointPose[20],
+            jointPose[12],
+            jointPose[14],
+            jointPose[16],
+            jointPose[18],
+            jointPose[9],
             jointPose[19],
-            jointPose[20]
+            jointPose[11],
+            jointPose[13],
+            jointPose[15],
+            jointPose[17]
         )
 
         val v = Array(20) { FloatArray(3) }
