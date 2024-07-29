@@ -49,6 +49,7 @@ class HandLandmarkerHelper(
             DELEGATE_CPU -> {
                 baseOptionBuilder.setDelegate(Delegate.CPU)
             }
+
             DELEGATE_GPU -> {
                 baseOptionBuilder.setDelegate(Delegate.GPU)
             }
@@ -65,6 +66,7 @@ class HandLandmarkerHelper(
                     )
                 }
             }
+
             else -> {
                 // no-op
             }
@@ -170,14 +172,17 @@ class HandLandmarkerHelper(
         result: HandLandmarkerResult,
         input: MPImage
     ) {
-
-        handLandmarkerHelperListener?.onHandResults(
-            ResultBundle(
-                listOf(result),
-                input.height,
-                input.width
+        if (result.landmarks().isEmpty()) {
+            handLandmarkerHelperListener?.onHandDetectionEmpty()
+        } else {
+            handLandmarkerHelperListener?.onHandResults(
+                ResultBundle(
+                    listOf(result),
+                    input.height,
+                    input.width
+                )
             )
-        )
+        }
     }
 
     // 이 HandLandmarkerHelper의 호출자에게 감지 중 발생한 오류 반환
@@ -196,6 +201,7 @@ class HandLandmarkerHelper(
     interface LandmarkerListener {
         fun onHandError(error: String, errorCode: Int = OTHER_ERROR)
         fun onHandResults(resultBundle: ResultBundle)
+        fun onHandDetectionEmpty()
     }
 
     companion object {

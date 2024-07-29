@@ -1,6 +1,7 @@
 package com.example.sign_language_detector.util
 
 import android.content.Context
+import android.util.Log
 import org.tensorflow.lite.Interpreter
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -46,11 +47,18 @@ class ModelPredictProcessor(context: Context) {
         sequenceLength: Int,
         step: Int
     ): List<List<List<Float>>> {
+        Log.d("ModelPredictProcessor", "Data size: ${data.size}")
+        Log.d("ModelPredictProcessor", "Sequence length: $sequenceLength")
+        Log.d("ModelPredictProcessor", "Step: $step")
+
         val sequences = mutableListOf<List<List<Float>>>()
         for (i in 0..data.size - sequenceLength step step) {
             val sequence = data.subList(i, i + sequenceLength)
             sequences.add(sequence)
         }
+
+        Log.d("ModelPredictProcessor", "Sequences: $sequences")
+
         return sequences
     }
 

@@ -23,6 +23,7 @@ import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.ui.splash.SplashFragment
+import com.example.sign_language_detector.usecase.CameraUseCase
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
@@ -42,16 +43,17 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private lateinit var viewModel: CameraViewModel
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
-    private lateinit var landmarkProcessor: LandmarkProcessor
-    private var preview: Preview? = null
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
-    private var camera: Camera? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
 
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
+
+    // 손 감지 상태를 추적하기 위한 변수
+    private var isHandDetected = false
+    private var latestLandmarkData: List<List<Float>> = emptyList()
 
     override fun onResume() {
         super.onResume()
@@ -155,63 +157,16 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 cameraProvider = cameraProviderFuture.get()
 
                 // 카메라 사용 사례 빌드 및 바인딩
-                bindCameraUseCases()
+                val cameraUseCase = CameraUseCase(
+                    this,
+                    cameraFacing,
+                    fragmentCameraBinding.viewFinder,
+                    viewModel,
+                    backgroundExecutor
+                )
+                cameraUseCase.bindCameraUseCases(cameraProvider!!)
             }, ContextCompat.getMainExecutor(requireContext())
         )
-    }
-
-    // 프리뷰, 캡처 및 분석 사용 사례 선언 및 바인딩
-    @SuppressLint("UnsafeOptInUsageError")
-    private fun bindCameraUseCases() {
-
-        // CameraProvider
-        val cameraProvider = cameraProvider
-            ?: throw IllegalStateException("Camera initialization failed.")
-
-        val cameraSelector =
-            CameraSelector.Builder().requireLensFacing(cameraFacing).build()
-
-        // 프리뷰. 모델과 가장 가까운 4:3 비율만 사용
-        preview = Preview.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
-            .build()
-
-        // 이미지 분석. 모델이 작동하는 방식을 맞추기 위해 RGBA 8888 사용
-        imageHandAnalyzer = ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-            .build()
-            .also {
-                it.setAnalyzer(backgroundExecutor) { image ->
-                    viewModel.detectHand(image, cameraFacing == CameraSelector.LENS_FACING_FRONT)
-                }
-            }
-
-        imagePoseAnalyzer = ImageAnalysis.Builder().setTargetAspectRatio(AspectRatio.RATIO_4_3)
-            .setTargetRotation(fragmentCameraBinding.viewFinder.display.rotation)
-            .setBackpressureStrategy(ImageAnalysis.STRATEGY_KEEP_ONLY_LATEST)
-            .setOutputImageFormat(ImageAnalysis.OUTPUT_IMAGE_FORMAT_RGBA_8888)
-            .build()
-            .also {
-                it.setAnalyzer(backgroundExecutor) { image ->
-                    viewModel.detectPose(image, cameraFacing == CameraSelector.LENS_FACING_FRONT)
-                }
-            }
-
-        // 바인딩 전에 사용 사례의 바인딩을 해제해야 함
-        cameraProvider.unbindAll()
-
-        try {
-            // 카메라는 CameraControl 및 CameraInfo에 접근 제공
-            camera = cameraProvider.bindToLifecycle(
-                this, cameraSelector, preview, imageHandAnalyzer, imagePoseAnalyzer
-            )
-            // 뷰 파인더의 서피스 공급자를 프리뷰 사용 사례에 연결
-            preview?.setSurfaceProvider(fragmentCameraBinding.viewFinder.surfaceProvider)
-        } catch (exc: Exception) {
-            Log.e(TAG, "Use case binding failed", exc)
-        }
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
@@ -236,10 +191,17 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
-                viewModel.processLandmarks(
+
+                // 손이 감지되었음을 업데이트
+                isHandDetected = true
+
+                Log.d("CameraFragment", "Hand results received. Processing landmarks...")
+
+                latestLandmarkData = viewModel.processLandmarks(
                     resultBundle,
                     PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0)
                 )
+                Log.d("CameraFragment", "Landmark data: $latestLandmarkData")
             }
         }
     }
@@ -274,6 +236,21 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     override fun onPoseError(error: String, errorCode: Int) {
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
+        }
+    }
+
+    override fun onHandDetectionEmpty() {
+        activity?.runOnUiThread{
+            if (isHandDetected) {
+                // 로그 추가
+                Log.d("CameraFragment", "Hand detection empty. Updating predicted word...")
+                if (latestLandmarkData.isNotEmpty()) {
+                    viewModel.updatePredictedWord(latestLandmarkData)
+                } else {
+                    Log.d("CameraFragment", "No landmark data available")
+                }
+                isHandDetected = false
+            }
         }
     }
 

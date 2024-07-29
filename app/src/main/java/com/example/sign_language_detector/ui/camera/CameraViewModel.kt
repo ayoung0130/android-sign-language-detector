@@ -30,14 +30,13 @@ class CameraViewModel(
     fun processLandmarks(
         resultHandBundles: HandLandmarkerHelper.ResultBundle,
         resultPoseBundles: PoseLandmarkerHelper.ResultBundle
-    ) {
+    ): List<List<Float>> {
         landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles)
-        val data = landmarkProcessor.getLandmarkData()
-        val prediction = modelPredictProcessor.predict(data)
-        updatePredictedWord(prediction)
+        return landmarkProcessor.getLandmarkData()
     }
 
-    private fun updatePredictedWord(word: String) {
-        _predictedWord.postValue(word)
+    fun updatePredictedWord(data: List<List<Float>>) {
+        val prediction = modelPredictProcessor.predict(data)
+        _predictedWord.postValue(prediction)
     }
 }
