@@ -201,6 +201,10 @@ class HandLandmarkerHelper(
     interface LandmarkerListener {
         fun onHandError(error: String, errorCode: Int = OTHER_ERROR)
         fun onHandResults(resultBundle: ResultBundle)
+
+        // 손 감지가 시작될 때의 함수도 생성해야함
+
+
         fun onHandDetectionEmpty()
     }
 

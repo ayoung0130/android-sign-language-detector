@@ -55,6 +55,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private var isHandDetected = false
     private var latestLandmarkData: List<List<Float>> = emptyList()
 
+    // 포즈 데이터를 임시로 저장할 변수
+    private var latestPoseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
+
     override fun onResume() {
         super.onResume()
         // 모든 권한이 여전히 존재하는지 확인, 사용자가 앱이 일시 중지된 동안 이를 제거할 수 있음
@@ -139,6 +142,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         fragmentCameraBinding.viewModel = viewModel
         fragmentCameraBinding.lifecycleOwner = viewLifecycleOwner
 
+        Log.d("CameraFragment", "ViewModel initialized: $viewModel")
+
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
             // 카메라와 그 사용 사례를 설정
@@ -197,9 +202,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 Log.d("CameraFragment", "Hand results received. Processing landmarks...")
 
+                // 포즈 결과가 있는 경우 손의 resultBundle과 함께 처리
                 latestLandmarkData = viewModel.processLandmarks(
                     resultBundle,
-                    PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0)
+                    latestPoseResultBundle ?: PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0)
                 )
                 Log.d("CameraFragment", "Landmark data: $latestLandmarkData")
             }
@@ -219,6 +225,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
+
+                // 포즈 결과를 임시로 저장
+                latestPoseResultBundle = resultBundle
+
                 viewModel.processLandmarks(
                     HandLandmarkerHelper.ResultBundle(emptyList(), 0, 0),
                     resultBundle
@@ -240,14 +250,15 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     }
 
     override fun onHandDetectionEmpty() {
-        activity?.runOnUiThread{
+        activity?.runOnUiThread {
             if (isHandDetected) {
-                // 로그 추가
-                Log.d("CameraFragment", "Hand detection empty. Updating predicted word...")
+                Log.d("CameraFragment",
+                    "Hand detection empty. Updating predicted word...")
                 if (latestLandmarkData.isNotEmpty()) {
                     viewModel.updatePredictedWord(latestLandmarkData)
                 } else {
-                    Log.d("CameraFragment", "No landmark data available")
+                    Log.d("CameraFragment",
+                        "No landmark data available")
                 }
                 isHandDetected = false
             }

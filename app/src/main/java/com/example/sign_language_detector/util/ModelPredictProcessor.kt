@@ -39,7 +39,7 @@ class ModelPredictProcessor(context: Context) {
 
         val finalPrediction =
             predictions.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
-        return actions[finalPrediction ?: 0]
+        return actions[finalPrediction!!]
     }
 
     private fun createSequences(
