@@ -22,20 +22,19 @@ class LandmarkProcessor {
         // 손 랜드마크 처리
         if (resultHandBundle.results.isNotEmpty()) {
 
-            val jointLeftHands = Array(21) { FloatArray(4) }
-            val jointRightHands = Array(21) { FloatArray(4) }
-            val jointPose = Array(21) { FloatArray(4) }
+            val jointLeftHands = Array(21) { FloatArray(3) }
+            val jointRightHands = Array(21) { FloatArray(3) }
+            val jointPose = Array(21) { FloatArray(3) }
 
             isCollectingData = true
 
             resultHandBundle.results.forEach { result ->
                 result.landmarks().forEachIndexed { i, hand ->
                     hand.forEachIndexed { j, lm ->
-                        val visibility = setVisibility(lm.x(), lm.y())
                         if (result.handedness()[i].first().categoryName() == "Left") {
-                            jointRightHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z(), visibility)
+                            jointRightHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
                         } else {
-                            jointLeftHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z(), visibility)
+                            jointLeftHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
                         }
                     }
                 }
@@ -47,7 +46,7 @@ class LandmarkProcessor {
                     pose.forEachIndexed { j, lm ->
                         if (i in poseLandmarkIndices) {
                             jointPose[poseLandmarkIndices.indexOf(j)] = floatArrayOf(
-                                lm.x(), lm.y(), lm.z(), lm.visibility().orElse(0.0f)
+                                lm.x(), lm.y(), lm.z()
                             )
                         }
                     }
@@ -208,12 +207,4 @@ class LandmarkProcessor {
         }
     }
 
-    // Hand 가시성 정보 처리
-    private fun setVisibility(x: Float, y: Float, epsilon: Float = 1e-6f): Float {
-        return when {
-            x <= epsilon && y <= epsilon -> 0f
-            x <= epsilon || y <= epsilon -> 0.5f
-            else -> 1f
-        }
-    }
 }
