@@ -3,13 +3,13 @@ package com.example.sign_language_detector.util
 import android.util.Log
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
+import java.util.Arrays
 import kotlin.math.acos
 import kotlin.math.sqrt
 
 class LandmarkProcessor {
 
     private val combinedData = mutableListOf<List<Float>>()
-    private var isCollectingData = false
 
     private val poseLandmarkIndices = listOf(
         0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
@@ -20,13 +20,11 @@ class LandmarkProcessor {
         resultPoseBundle: PoseLandmarkerHelper.ResultBundle,
     ) {
         // 손 랜드마크 처리
-        if (resultHandBundle.results.isNotEmpty()) {
+        if (resultHandBundle.results.first().landmarks().isNotEmpty()) {
 
             val jointLeftHands = Array(21) { FloatArray(3) }
             val jointRightHands = Array(21) { FloatArray(3) }
             val jointPose = Array(21) { FloatArray(3) }
-
-            isCollectingData = true
 
             resultHandBundle.results.forEach { result ->
                 result.landmarks().forEachIndexed { i, hand ->
@@ -42,9 +40,9 @@ class LandmarkProcessor {
 
             // 포즈 랜드마크 처리
             resultPoseBundle.results.forEach { result ->
-                result.landmarks().forEachIndexed { i, pose ->
+                result.landmarks().forEachIndexed { _, pose ->
                     pose.forEachIndexed { j, lm ->
-                        if (i in poseLandmarkIndices) {
+                        if (j in poseLandmarkIndices) {
                             jointPose[poseLandmarkIndices.indexOf(j)] = floatArrayOf(
                                 lm.x(), lm.y(), lm.z()
                             )
@@ -52,6 +50,10 @@ class LandmarkProcessor {
                     }
                 }
             }
+
+            Log.d("tag", "왼손: ${jointLeftHands.contentDeepToString()}")
+            Log.d("tag", "오른손: ${jointRightHands.contentDeepToString()}")
+            Log.d("tag", "포즈: ${jointPose.contentDeepToString()}")
 
             // 모든 랜드마크 합치기
             val joint =
@@ -61,17 +63,20 @@ class LandmarkProcessor {
             val rightHandAngles = angleHands(jointRightHands)
             val poseAngles = anglePose(jointPose)
 
+            Log.d("tag", "왼손 각도: ${leftHandAngles.contentToString()}")
+            Log.d("tag", "오른손 각도: ${rightHandAngles.contentToString()}")
+            Log.d("tag", "포즈 각도: ${poseAngles.contentToString()}")
+
             // 각도 계산 추가
             val combined =
                 joint + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()
 
+            Log.d("tag", "처리된 데이터: $combined")
+
             combinedData.add(combined)
 
         } else {
-            if (isCollectingData) {
-                isCollectingData = false
-                clearData()
-            }
+            clearData()
         }
     }
 

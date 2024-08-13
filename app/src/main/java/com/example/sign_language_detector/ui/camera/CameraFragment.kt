@@ -8,11 +8,8 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
-import androidx.camera.core.AspectRatio
-import androidx.camera.core.Camera
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageAnalysis
-import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
@@ -36,27 +33,23 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     PoseLandmarkerHelper.LandmarkerListener {
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
-
     private val fragmentCameraBinding
         get() = _fragmentCameraBinding!!
 
     private lateinit var viewModel: CameraViewModel
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
+
     private var imageHandAnalyzer: ImageAnalysis? = null
     private var imagePoseAnalyzer: ImageAnalysis? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
 
+    private var handResultBundle: HandLandmarkerHelper.ResultBundle? = null
+    private var poseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
+
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
-
-    // 손 감지 상태를 추적하기 위한 변수
-    private var isHandDetected = false
-    private var latestLandmarkData: List<List<Float>> = emptyList()
-
-    // 포즈 데이터를 임시로 저장할 변수
-    private var latestPoseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
 
     override fun onResume() {
         super.onResume()
@@ -136,13 +129,14 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         )
         val landmarkProcessor = LandmarkProcessor()
         val modelPredictProcessor = ModelPredictProcessor(requireContext())
-        val factory = CameraViewModelFactory(detectUseCase, landmarkProcessor, modelPredictProcessor)
+        val factory =
+            CameraViewModelFactory(detectUseCase, landmarkProcessor, modelPredictProcessor)
         viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
 
         fragmentCameraBinding.viewModel = viewModel
         fragmentCameraBinding.lifecycleOwner = viewLifecycleOwner
 
-        Log.d("CameraFragment", "ViewModel initialized: $viewModel")
+        Log.d("tag", "ViewModel initialized: $viewModel")
 
         // 뷰가 제대로 배치될 때까지 대기
         fragmentCameraBinding.viewFinder.post {
@@ -185,7 +179,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     // 손이 감지된 후 UI 업데이트. 오리지널 이미지 높이/너비를 추출하고 캔버스를 통해 랜드마크를 올바르게 배치
     override fun onHandResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
-            if (_fragmentCameraBinding != null) {
+            if (_fragmentCameraBinding != null && resultBundle.results.isNotEmpty()) {
+                val handResult = resultBundle.results.first()
+
                 // 필요한 정보를 OverlayView에 전달하여 캔버스에 그림
                 fragmentCameraBinding.overlay.setHandResults(
                     resultBundle.results.first(),
@@ -197,17 +193,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
 
-                // 손이 감지되었음을 업데이트
-                isHandDetected = true
-
-                Log.d("CameraFragment", "Hand results received. Processing landmarks...")
-
-                // 포즈 결과가 있는 경우 손의 resultBundle과 함께 처리
-                latestLandmarkData = viewModel.processLandmarks(
-                    resultBundle,
-                    latestPoseResultBundle ?: PoseLandmarkerHelper.ResultBundle(emptyList(), 0, 0)
-                )
-                Log.d("CameraFragment", "Landmark data: $latestLandmarkData")
+                if (handResult.landmarks().isNotEmpty()) {
+                    handResultBundle = resultBundle
+                    processCombinedResults()
+                }
             }
         }
     }
@@ -215,7 +204,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     // 포즈가 감지된 후 UI 업데이트
     override fun onPoseResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
-            if (_fragmentCameraBinding != null) {
+            if (_fragmentCameraBinding != null && resultBundle.results.isNotEmpty()) {
+                val poseResult = resultBundle.results.first()
+
                 fragmentCameraBinding.overlay.setPoseResults(
                     resultBundle.results.first(),
                     resultBundle.inputImageHeight,
@@ -226,13 +217,31 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
 
-                // 포즈 결과를 임시로 저장
-                latestPoseResultBundle = resultBundle
+                if (poseResult.landmarks().isNotEmpty()) {
+                    poseResultBundle = resultBundle
+                    processCombinedResults()
+                }
+            }
+        }
+    }
 
-                viewModel.processLandmarks(
-                    HandLandmarkerHelper.ResultBundle(emptyList(), 0, 0),
-                    resultBundle
-                )
+    private fun processCombinedResults() {
+        if (handResultBundle != null && poseResultBundle != null) {
+            Log.d("tag", "랜드마크 처리 전..")
+
+            try {
+                viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
+
+//                viewModel.updatePredictedWord(viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!))
+
+                // 결과 반환 후 초기화
+                handResultBundle = null
+                poseResultBundle = null
+
+                Log.d("tag", "랜드마크 처리 완료..")
+
+            } catch (e: Exception) {
+                Log.e("tag", "랜드마크 처리 중 오류 발생: ${e.message}", e)
             }
         }
     }
@@ -247,25 +256,5 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         activity?.runOnUiThread {
             Toast.makeText(requireContext(), error, Toast.LENGTH_SHORT).show()
         }
-    }
-
-    override fun onHandDetectionEmpty() {
-        activity?.runOnUiThread {
-            if (isHandDetected) {
-                Log.d("CameraFragment",
-                    "Hand detection empty. Updating predicted word...")
-                if (latestLandmarkData.isNotEmpty()) {
-                    viewModel.updatePredictedWord(latestLandmarkData)
-                } else {
-                    Log.d("CameraFragment",
-                        "No landmark data available")
-                }
-                isHandDetected = false
-            }
-        }
-    }
-
-    companion object {
-        private const val TAG = "Landmarker"
     }
 }
