@@ -172,17 +172,13 @@ class HandLandmarkerHelper(
         result: HandLandmarkerResult,
         input: MPImage
     ) {
-        if (result.landmarks().isEmpty()) {
-            handLandmarkerHelperListener?.onHandDetectionEmpty()
-        } else {
-            handLandmarkerHelperListener?.onHandResults(
-                ResultBundle(
-                    listOf(result),
-                    input.height,
-                    input.width
-                )
+        handLandmarkerHelperListener?.onHandResults(
+            ResultBundle(
+                listOf(result),
+                input.height,
+                input.width
             )
-        }
+        )
     }
 
     // 이 HandLandmarkerHelper의 호출자에게 감지 중 발생한 오류 반환
@@ -201,11 +197,6 @@ class HandLandmarkerHelper(
     interface LandmarkerListener {
         fun onHandError(error: String, errorCode: Int = OTHER_ERROR)
         fun onHandResults(resultBundle: ResultBundle)
-
-        // 손 감지가 시작될 때의 함수도 생성해야함
-
-
-        fun onHandDetectionEmpty()
     }
 
     companion object {
