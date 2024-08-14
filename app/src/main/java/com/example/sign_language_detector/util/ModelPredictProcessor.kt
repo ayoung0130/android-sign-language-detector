@@ -26,8 +26,8 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<List<Float>>): String {
-        val inputSequences = createSequences(data, 30, 10)
+    fun predict(data: List<FloatArray>): String {
+        val inputSequences = createSequences(data, 15, 15)
         val predictions = mutableListOf<Int>()
 
         for (sequence in inputSequences) {
@@ -43,15 +43,15 @@ class ModelPredictProcessor(context: Context) {
     }
 
     private fun createSequences(
-        data: List<List<Float>>,
+        data: List<FloatArray>,
         sequenceLength: Int,
         step: Int
-    ): List<List<List<Float>>> {
+    ): List<List<FloatArray>> {
         Log.d("ModelPredictProcessor", "Data size: ${data.size}")
         Log.d("ModelPredictProcessor", "Sequence length: $sequenceLength")
         Log.d("ModelPredictProcessor", "Step: $step")
 
-        val sequences = mutableListOf<List<List<Float>>>()
+        val sequences = mutableListOf<List<FloatArray>>()
         for (i in 0..data.size - sequenceLength step step) {
             val sequence = data.subList(i, i + sequenceLength)
             sequences.add(sequence)

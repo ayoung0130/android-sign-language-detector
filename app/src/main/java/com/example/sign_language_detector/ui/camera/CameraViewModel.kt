@@ -31,15 +31,13 @@ class CameraViewModel(
     fun processLandmarks(
         resultHandBundles: HandLandmarkerHelper.ResultBundle,
         resultPoseBundles: PoseLandmarkerHelper.ResultBundle
-    ): List<List<Float>> {
+    ): FloatArray {
         landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles)
         return landmarkProcessor.getLandmarkData()
     }
 
-    fun updatePredictedWord(data: List<List<Float>>) {
-        Log.d("tag", "Updating predicted word with data: $data")
-        val prediction = modelPredictProcessor.predict(data)
-        _predictedWord.postValue(prediction)    // 예측된 텍스트를 LiveData로 업데이트
-        Log.d("tag", "Prediction: $prediction")
+    fun updatePredictedWord(data: List<FloatArray>) {
+        _predictedWord.postValue(modelPredictProcessor.predict(data))    // 예측된 텍스트를 LiveData로 업데이트
+        Log.d("tag", "예측 결과: ${modelPredictProcessor.predict(data)}")
     }
 }

@@ -9,7 +9,7 @@ import kotlin.math.sqrt
 
 class LandmarkProcessor {
 
-    private val combinedData = mutableListOf<List<Float>>()
+    private var combinedData = FloatArray(234)
 
     private val poseLandmarkIndices = listOf(
         0, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24, 25, 26
@@ -69,24 +69,25 @@ class LandmarkProcessor {
 
             // 각도 계산 추가
             val combined =
-                joint + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()
+                (joint + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()).toFloatArray()
 
-            Log.d("tag", "처리된 데이터: $combined")
+            Log.d("tag", "처리된 데이터: ${combined.contentToString()}")
 
-            combinedData.add(combined)
+            combinedData = combined
 
         } else {
             clearData()
         }
     }
 
-    fun getLandmarkData(): List<List<Float>> {
-        Log.d("Landmark", "$combinedData")
+    fun getLandmarkData(): FloatArray {
+        Log.d("Landmark", combinedData.contentToString())
+        Log.d("Landmark", combinedData.size.toString())
         return combinedData
     }
 
     private fun clearData() {
-        combinedData.clear()
+        combinedData = FloatArray(234) // 데이터 초기화
     }
 
     // 각도 처리
