@@ -3,6 +3,8 @@ package com.example.sign_language_detector.util
 import android.content.Context
 import android.util.Log
 import org.tensorflow.lite.Interpreter
+import java.io.BufferedReader
+import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -13,21 +15,12 @@ class ModelPredictProcessor(context: Context) {
     init {
         val model = loadModelFile(context, "sign_language_detect_model.tflite")
         tflite = Interpreter(model)
+    }
 
-        // 입력 텐서 정보 가져오기
-        val inputTensor = tflite.getInputTensor(0)
-        val inputShape = inputTensor.shape() // 입력 텐서의 형태 (배열 형태로 반환)
-        val inputDataType = inputTensor.dataType() // 입력 데이터 타입 (FLOAT32 등)
-
-        // 출력 텐서 정보 가져오기
-        val outputTensor = tflite.getOutputTensor(0)
-        val outputShape = outputTensor.shape() // 출력 텐서의 형태 (배열 형태로 반환)
-        val outputDataType = outputTensor.dataType() // 출력 데이터 타입 (FLOAT32 등)
-
-        Log.d("ModelPredictProcessor", "Input shape: ${inputShape.contentToString()}")
-        Log.d("ModelPredictProcessor", "Input data type: $inputDataType")
-        Log.d("ModelPredictProcessor", "Output shape: ${outputShape.contentToString()}")
-        Log.d("ModelPredictProcessor", "Output data type: $outputDataType")
+    fun loadAndPredict(context: Context, fileName: String): String {
+        // 텍스트 파일에서 데이터를 읽어 FloatArray로 변환
+        val inputData = loadInputDataFromTxt(context, fileName)
+        return predict(inputData)
     }
 
     private fun loadModelFile(context: Context, modelFileName: String): ByteBuffer {
@@ -73,6 +66,19 @@ class ModelPredictProcessor(context: Context) {
         Log.d("ModelPredictProcessor", "finalPrediction: $finalPrediction")
 
         return actions[finalPrediction!!]
+    }
+
+    private fun loadInputDataFromTxt(context: Context, fileName: String): List<FloatArray> {
+        val inputData = mutableListOf<FloatArray>()
+        context.assets.open(fileName).use { inputStream ->
+            BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
+                lines.forEach { line ->
+                    val values = line.split(",").map { it.toFloat() }.toFloatArray()
+                    inputData.add(values)
+                }
+            }
+        }
+        return inputData
     }
 
     private fun createSequences(

@@ -1,5 +1,6 @@
 package com.example.sign_language_detector.ui.camera
 
+import android.content.Context
 import android.util.Log
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
@@ -38,5 +39,9 @@ class CameraViewModel(
 
     fun updatePredictedWord(data: List<FloatArray>) {
         _predictedWord.postValue(modelPredictProcessor.predict(data))    // 예측된 텍스트를 LiveData로 업데이트
+    }
+
+    fun loadAndPredict(context: Context, fileName: String){
+        Log.d("tag", "file name: ${fileName}, predict: ${modelPredictProcessor.loadAndPredict(context, fileName)}")
     }
 }

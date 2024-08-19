@@ -74,6 +74,18 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 poseLandmarkerHelper.setupPoseLandmarker()
             }
         }
+
+        context?.let { viewModel.loadAndPredict(it, "1_가렵다_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_기절_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_부러지다_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_어제_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_어지러움_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_열나다_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_오늘_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_진통제_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_창백하다_output.txt") }
+        context?.let { viewModel.loadAndPredict(it, "1_토하다_output.txt") }
+
     }
 
     override fun onDestroyView() {
@@ -244,6 +256,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 // 랜드마크 데이터 처리, 결과를 받아옴
                 val processedLandmarks =
                     viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
+                Log.d("tag", "processedLandmarks: ${processedLandmarks.contentToString()}")
+                Log.d("tag", "processedLandmarks size: ${processedLandmarks.size}")
 
                 // 처리된 랜드마크 데이터를 누적하여 저장
                 storedLandmarkData.add(processedLandmarks)
