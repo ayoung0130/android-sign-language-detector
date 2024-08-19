@@ -50,7 +50,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private var poseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
 
     private var frameCount = 0
-    private val minFrameCountForPrediction = 30
+    private val minFrameCountForPrediction = 15
     private val storedLandmarkData = mutableListOf<FloatArray>()
 
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
@@ -235,35 +235,30 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     }
 
     private fun processCombinedResults() {
+
         if (handResultBundle != null && poseResultBundle != null) {
-            try {
+
+            frameCount++
+
+            if (frameCount % 3 == 0) {
                 // 랜드마크 데이터 처리, 결과를 받아옴
-                val processedLandmarks = viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
+                val processedLandmarks =
+                    viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
 
                 // 처리된 랜드마크 데이터를 누적하여 저장
                 storedLandmarkData.add(processedLandmarks)
 
-                frameCount++
-
+                Log.d("tag", "storedLandmarkData size: ${storedLandmarkData.size}")
                 Log.d("tag", "랜드마크 처리 완료..")
                 Log.d("tag", "현재 프레임 수: $frameCount")
-
-            } catch (e: Exception) {
-                Log.e("tag", "랜드마크 처리 중 오류 발생: ${e.message}", e)
-                frameCount = 0
             }
+
         } else if (handResultBundle == null && frameCount >= minFrameCountForPrediction) {
             Log.d("tag", "모델 예측 수행.")
 
-            try {
-                if (storedLandmarkData.isNotEmpty()) {
-                    viewModel.updatePredictedWord(storedLandmarkData)
-                    Log.d("tag", "모델 예측 완료")
-                } else {
-                    Log.d("tag", "저장된 랜드마크 데이터가 없습니다.")
-                }
-            } catch (e: Exception) {
-                Log.e("tag", "예측 수행 중 오류 발생: ${e.message}", e)
+            if (storedLandmarkData.isNotEmpty()) {
+                viewModel.updatePredictedWord(storedLandmarkData)
+                Log.d("tag", "모델 예측 완료")
             }
 
             // 예측 수행 후 상태 초기화

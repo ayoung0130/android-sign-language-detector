@@ -38,6 +38,5 @@ class CameraViewModel(
 
     fun updatePredictedWord(data: List<FloatArray>) {
         _predictedWord.postValue(modelPredictProcessor.predict(data))    // 예측된 텍스트를 LiveData로 업데이트
-        Log.d("tag", "예측 결과: ${modelPredictProcessor.predict(data)}")
     }
 }

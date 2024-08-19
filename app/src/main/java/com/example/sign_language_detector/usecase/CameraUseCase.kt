@@ -28,7 +28,7 @@ class CameraUseCase(
 
         // 프리뷰 설정
         val preview = Preview.Builder()
-            .setTargetAspectRatio(AspectRatio.RATIO_4_3)
+            .setTargetAspectRatio(AspectRatio.RATIO_4_3)   // RATIO_4_3  RATIO_16_9
             .setTargetRotation(viewFinder.display.rotation)
             .build()
 

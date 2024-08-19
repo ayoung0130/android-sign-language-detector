@@ -114,7 +114,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         handLandmarkerResults: HandLandmarkerResult,
         imageHeight: Int,
         imageWidth: Int,
-        runningMode: RunningMode = RunningMode.IMAGE
+        runningMode: RunningMode = RunningMode.LIVE_STREAM
     ) {
         handResults = handLandmarkerResults
 
@@ -138,7 +138,7 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         poseLandmarkerResults: PoseLandmarkerResult,
         imageHeight: Int,
         imageWidth: Int,
-        runningMode: RunningMode = RunningMode.IMAGE
+        runningMode: RunningMode = RunningMode.LIVE_STREAM
     ) {
         poseResults = poseLandmarkerResults
 
@@ -159,6 +159,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     companion object {
-        private const val LANDMARK_STROKE_WIDTH = 8F
+        private const val LANDMARK_STROKE_WIDTH = 10F
     }
 }
