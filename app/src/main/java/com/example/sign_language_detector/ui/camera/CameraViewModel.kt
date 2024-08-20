@@ -1,13 +1,9 @@
 package com.example.sign_language_detector.ui.camera
 
-import android.content.Context
-import android.util.Log
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.example.sign_language_detector.repository.HandLandmarkerHelper
-import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
@@ -29,11 +25,12 @@ class CameraViewModel(
         detectUseCase.detectPose(imageProxy, isFrontCamera)
     }
 
-    fun processLandmarks(
-        resultHandBundles: HandLandmarkerHelper.ResultBundle,
-        resultPoseBundles: PoseLandmarkerHelper.ResultBundle
-    ): FloatArray {
-        return (landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles))
+    fun calculateHandAngle(handLandmark: Array<FloatArray>): FloatArray {
+        return landmarkProcessor.angleHands(handLandmark)
+    }
+
+    fun calculatePoseAngle(poseLandmark: Array<FloatArray>): FloatArray {
+        return landmarkProcessor.anglePose(poseLandmark)
     }
 
     fun updatePredictedWord(data: List<FloatArray>) {

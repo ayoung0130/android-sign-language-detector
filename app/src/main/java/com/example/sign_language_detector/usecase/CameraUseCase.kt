@@ -2,6 +2,7 @@ package com.example.sign_language_detector.usecase
 
 import android.annotation.SuppressLint
 import android.util.Log
+import android.util.Size
 import android.view.View
 import androidx.camera.core.AspectRatio
 import androidx.camera.core.CameraSelector

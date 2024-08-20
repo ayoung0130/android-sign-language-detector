@@ -49,8 +49,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private var handResultBundle: HandLandmarkerHelper.ResultBundle? = null
     private var poseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
 
-    private var frameCount = 0
-    private val minFrameCountForPrediction = 15
+    private val poseLandmarkIndices = listOf(
+        0, 2, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
+    )
+
     private val storedLandmarkData = mutableListOf<FloatArray>()
 
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
@@ -148,7 +150,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             // 카메라와 그 사용 사례를 설정
             setUpCamera()
         }
-
     }
 
     // CameraX 초기화 및 카메라 사용 사례 준비
@@ -185,25 +186,18 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     override fun onHandResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
             if (_fragmentCameraBinding != null && resultBundle.results.isNotEmpty()) {
-                val handResult = resultBundle.results.first()
-
                 // 필요한 정보를 OverlayView에 전달하여 캔버스에 그림
                 fragmentCameraBinding.overlay.setHandResults(
                     resultBundle.results.first(),
-                    resultBundle.inputImageHeight,
-                    resultBundle.inputImageWidth,
+                    resultBundle.inputImageHeight,  //640
+                    resultBundle.inputImageWidth,   //480
                     RunningMode.LIVE_STREAM
                 )
-
                 // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
 
-                if (handResult.landmarks().isNotEmpty()) {
-                    handResultBundle = resultBundle
-                    processCombinedResults()
-                } else {
-                    handResultBundle = null
-                }
+                handResultBundle = resultBundle
+                processCombinedResults()
             }
         }
     }
@@ -212,65 +206,82 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     override fun onPoseResults(resultBundle: PoseLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
             if (_fragmentCameraBinding != null && resultBundle.results.isNotEmpty()) {
-                val poseResult = resultBundle.results.first()
-
                 fragmentCameraBinding.overlay.setPoseResults(
                     resultBundle.results.first(),
                     resultBundle.inputImageHeight,
                     resultBundle.inputImageWidth,
                     RunningMode.LIVE_STREAM
                 )
-
-                // 다시 그리기 강제
                 fragmentCameraBinding.overlay.invalidate()
 
-                if (poseResult.landmarks().isNotEmpty()) {
-                    poseResultBundle = resultBundle
-                    processCombinedResults()
-                } else {
-                    poseResultBundle = null
-                }
+                poseResultBundle = resultBundle
             }
         }
     }
 
     private fun processCombinedResults() {
 
-        if (handResultBundle != null && poseResultBundle != null) {
+        // 손 랜드마크 데이터가 존재하면 (손 검출시)
+        if (handResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true) {
 
-            frameCount++
+            val jointLeftHands = Array(21) { FloatArray(2) }
+            val jointRightHands = Array(21) { FloatArray(2) }
+            val jointPose = Array(21) { FloatArray(2) }
 
-            // 랜드마크 데이터 처리, 결과를 받아옴
-            val processedLandmarks =
-                viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
-            Log.d("tag", "processedLandmarks: ${processedLandmarks.contentToString()}")
-            Log.d("tag", "processedLandmarks size: ${processedLandmarks.size}")
+            handResultBundle!!.results.forEach { result ->
+                result.landmarks().forEachIndexed { i, hand ->
+                    val handedness = result.handedness()[i].first().categoryName()
 
-            // 처리된 랜드마크 데이터를 누적하여 저장
-            storedLandmarkData.add(processedLandmarks)
-
-            Log.d("tag", "storedLandmarkData size: ${storedLandmarkData.size}")
-            Log.d("tag", "랜드마크 처리 완료..")
-            Log.d("tag", "현재 프레임 수: $frameCount")
-
-        } else if (handResultBundle == null && frameCount > 0) {
-
-            if (frameCount <= minFrameCountForPrediction) {
-                Toast.makeText(requireContext(), "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
-
-                frameCount = 0
-                storedLandmarkData.clear() // 데이터 초기화
-            } else {
-                Log.d("tag", "모델 예측 수행.")
-
-                if (storedLandmarkData.isNotEmpty()) {
-                    viewModel.updatePredictedWord(storedLandmarkData)
-                    Log.d("tag", "모델 예측 완료")
+                    // 손의 핸디드니스에 따라 적절한 배열에 값을 저장
+                    if (handedness == "Left") {
+                        hand.forEachIndexed { j, lm ->
+                            jointRightHands[j] = floatArrayOf(lm.x(), lm.y())
+                        }
+                    } else if (handedness == "Right") {
+                        hand.forEachIndexed { j, lm ->
+                            jointLeftHands[j] = floatArrayOf(lm.x(), lm.y())
+                        }
+                    }
                 }
+            }
 
-                // 예측 수행 후 상태 초기화
-                frameCount = 0
-                storedLandmarkData.clear() // 데이터 초기화
+            // 포즈 검출시
+            if (poseResultBundle?.results?.first()?.landmarks() != null) {
+                poseResultBundle!!.results.forEach { result ->
+                    result.landmarks().forEachIndexed { _, pose ->
+                        pose.forEachIndexed { j, lm ->
+                            if (j in poseLandmarkIndices) {
+                                jointPose[poseLandmarkIndices.indexOf(j)] = floatArrayOf(
+                                    lm.x(), lm.y()
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+
+            val leftHandAngle = viewModel.calculateHandAngle(jointLeftHands)
+            val rightHandAngle = viewModel.calculateHandAngle(jointRightHands)
+            val poseAngle = viewModel.calculatePoseAngle(jointPose)
+
+            // 모든 랜드마크와 각도 데이터를 하나의 배열로 결합
+            val jointData = jointLeftHands.flatMap { it.toList() } +
+                    jointRightHands.flatMap { it.toList() } +
+                    jointPose.flatMap { it.toList() }
+
+            val data =
+                (jointData + leftHandAngle.toList() + rightHandAngle.toList() + poseAngle.toList()).toFloatArray()
+
+            Log.d("tag", "data size: ${data.size}")
+
+            storedLandmarkData.add(data)
+            Log.d("tag", "storedData size: ${storedLandmarkData.size}")
+
+        } else {
+            if (storedLandmarkData.size > 15) {
+                Log.d("tag", "손 내려감! 예측 수행")
+                viewModel.updatePredictedWord(storedLandmarkData)
+                storedLandmarkData.clear()
             }
         }
     }
