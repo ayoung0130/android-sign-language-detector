@@ -20,7 +20,7 @@ class PoseLandmarkerHelper(
     var minPoseTrackingConfidence: Float = DEFAULT_POSE_TRACKING_CONFIDENCE,
     var minPosePresenceConfidence: Float = DEFAULT_POSE_PRESENCE_CONFIDENCE,
     var currentDelegate: Int = DELEGATE_CPU,
-    var runningMode: RunningMode = RunningMode.IMAGE,
+    var runningMode: RunningMode = RunningMode.LIVE_STREAM,
     val context: Context,
     val poseLandmarkerHelperListener: LandmarkerListener? = null
 ) {

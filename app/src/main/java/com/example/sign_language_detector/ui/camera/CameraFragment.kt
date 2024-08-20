@@ -74,18 +74,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 poseLandmarkerHelper.setupPoseLandmarker()
             }
         }
-
-        context?.let { viewModel.loadAndPredict(it, "1_가렵다_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_기절_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_부러지다_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_어제_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_어지러움_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_열나다_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_오늘_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_진통제_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_창백하다_output.txt") }
-        context?.let { viewModel.loadAndPredict(it, "1_토하다_output.txt") }
-
     }
 
     override fun onDestroyView() {
@@ -252,32 +240,38 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
             frameCount++
 
-            if (frameCount % 3 == 0) {
-                // 랜드마크 데이터 처리, 결과를 받아옴
-                val processedLandmarks =
-                    viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
-                Log.d("tag", "processedLandmarks: ${processedLandmarks.contentToString()}")
-                Log.d("tag", "processedLandmarks size: ${processedLandmarks.size}")
+            // 랜드마크 데이터 처리, 결과를 받아옴
+            val processedLandmarks =
+                viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
+            Log.d("tag", "processedLandmarks: ${processedLandmarks.contentToString()}")
+            Log.d("tag", "processedLandmarks size: ${processedLandmarks.size}")
 
-                // 처리된 랜드마크 데이터를 누적하여 저장
-                storedLandmarkData.add(processedLandmarks)
+            // 처리된 랜드마크 데이터를 누적하여 저장
+            storedLandmarkData.add(processedLandmarks)
 
-                Log.d("tag", "storedLandmarkData size: ${storedLandmarkData.size}")
-                Log.d("tag", "랜드마크 처리 완료..")
-                Log.d("tag", "현재 프레임 수: $frameCount")
+            Log.d("tag", "storedLandmarkData size: ${storedLandmarkData.size}")
+            Log.d("tag", "랜드마크 처리 완료..")
+            Log.d("tag", "현재 프레임 수: $frameCount")
+
+        } else if (handResultBundle == null && frameCount > 0) {
+
+            if (frameCount <= minFrameCountForPrediction) {
+                Toast.makeText(requireContext(), "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
+
+                frameCount = 0
+                storedLandmarkData.clear() // 데이터 초기화
+            } else {
+                Log.d("tag", "모델 예측 수행.")
+
+                if (storedLandmarkData.isNotEmpty()) {
+                    viewModel.updatePredictedWord(storedLandmarkData)
+                    Log.d("tag", "모델 예측 완료")
+                }
+
+                // 예측 수행 후 상태 초기화
+                frameCount = 0
+                storedLandmarkData.clear() // 데이터 초기화
             }
-
-        } else if (handResultBundle == null && frameCount >= minFrameCountForPrediction) {
-            Log.d("tag", "모델 예측 수행.")
-
-            if (storedLandmarkData.isNotEmpty()) {
-                viewModel.updatePredictedWord(storedLandmarkData)
-                Log.d("tag", "모델 예측 완료")
-            }
-
-            // 예측 수행 후 상태 초기화
-            frameCount = 0
-            storedLandmarkData.clear() // 데이터 초기화
         }
     }
 

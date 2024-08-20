@@ -63,7 +63,7 @@ class CameraUseCase(
 
         try {
             // 카메라는 CameraControl 및 CameraInfo에 접근 제공
-            val camera = cameraProvider.bindToLifecycle(
+            cameraProvider.bindToLifecycle(
                 fragment, cameraSelector, preview, imageHandAnalyzer, imagePoseAnalyzer
             )
             // 뷰 파인더의 서피스 공급자를 프리뷰 사용 사례에 연결

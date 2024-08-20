@@ -33,15 +33,11 @@ class CameraViewModel(
         resultHandBundles: HandLandmarkerHelper.ResultBundle,
         resultPoseBundles: PoseLandmarkerHelper.ResultBundle
     ): FloatArray {
-        landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles)
-        return landmarkProcessor.getLandmarkData()
+        return (landmarkProcessor.processLandmarks(resultHandBundles, resultPoseBundles))
     }
 
     fun updatePredictedWord(data: List<FloatArray>) {
         _predictedWord.postValue(modelPredictProcessor.predict(data))    // 예측된 텍스트를 LiveData로 업데이트
     }
 
-    fun loadAndPredict(context: Context, fileName: String){
-        Log.d("tag", "file name: ${fileName}, predict: ${modelPredictProcessor.loadAndPredict(context, fileName)}")
-    }
 }

@@ -1,14 +1,11 @@
 package com.example.sign_language_detector.util
 
-import android.util.Log
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import kotlin.math.acos
 import kotlin.math.sqrt
 
 class LandmarkProcessor {
-
-    private var combinedData = FloatArray(171)
 
     private val poseLandmarkIndices = listOf(
         0, 2, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
@@ -17,19 +14,24 @@ class LandmarkProcessor {
     fun processLandmarks(
         resultHandBundle: HandLandmarkerHelper.ResultBundle,
         resultPoseBundle: PoseLandmarkerHelper.ResultBundle,
-    ) {
-        // 21개의 행, 3개의 열
+    ) : FloatArray {
+        // 21개의 행, 2개의 열
         val jointLeftHands = Array(21) { FloatArray(2) }
         val jointRightHands = Array(21) { FloatArray(2) }
         val jointPose = Array(21) { FloatArray(2) }
 
         resultHandBundle.results.forEach { result ->
             result.landmarks().forEachIndexed { i, hand ->
-                hand.forEachIndexed { j, lm ->
-                    if (result.handedness()[i].first().categoryName() == "Left") {
-                        jointRightHands[j] = floatArrayOf(lm.x(), lm.y())
-                    } else  {
+                val handedness = result.handedness()[i].first().categoryName()
+
+                // 손의 핸디드니스에 따라 적절한 배열에 값을 저장
+                if (handedness == "Left") {
+                    hand.forEachIndexed { j, lm ->
                         jointLeftHands[j] = floatArrayOf(lm.x(), lm.y())
+                    }
+                } else if (handedness == "Right") {
+                    hand.forEachIndexed { j, lm ->
+                        jointRightHands[j] = floatArrayOf(lm.x(), lm.y())
                     }
                 }
             }
@@ -48,31 +50,17 @@ class LandmarkProcessor {
             }
         }
 
-        // 로그 출력 0번 인덱스 좌표
-        Log.d("LandmarkProcessor", "Left Hand [0] -> x: ${jointLeftHands[0][0]}, y: ${jointLeftHands[0][1]}")
-        Log.d("LandmarkProcessor", "Right Hand [0] -> x: ${jointRightHands[0][0]}, y: ${jointRightHands[0][1]}")
-        Log.d("LandmarkProcessor", "Pose [0] -> x: ${jointPose[0][0]}, y: ${jointPose[0][1]}")
-
         // 각도 계산
         val leftHandAngles = angleHands(jointLeftHands)
         val rightHandAngles = angleHands(jointRightHands)
         val poseAngles = anglePose(jointPose)
-
-        // 로그 출력: 각도값
-        Log.d("LandmarkProcessor", "Left Hand Angle: ${leftHandAngles.contentToString()}")
-        Log.d("LandmarkProcessor", "Right Hand Angle: ${rightHandAngles.contentToString()}")
-        Log.d("LandmarkProcessor", "Pose Angle: ${poseAngles.contentToString()}")
 
         // 모든 랜드마크와 각도 데이터를 하나의 배열로 결합
         val jointData = jointLeftHands.flatMap { it.toList() } +
                 jointRightHands.flatMap { it.toList() } +
                 jointPose.flatMap { it.toList() }
 
-        combinedData = (jointData + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()).toFloatArray()
-    }
-
-    fun getLandmarkData(): FloatArray {
-        return combinedData
+        return (jointData + leftHandAngles.toList() + rightHandAngles.toList() + poseAngles.toList()).toFloatArray()
     }
 
     // 각도 처리

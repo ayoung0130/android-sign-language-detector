@@ -21,7 +21,7 @@ class HandLandmarkerHelper(
     var minHandPresenceConfidence: Float = DEFAULT_HAND_PRESENCE_CONFIDENCE,
     var maxNumHands: Int = DEFAULT_NUM_HANDS,
     var currentDelegate: Int = DELEGATE_CPU,
-    var runningMode: RunningMode = RunningMode.IMAGE,
+    var runningMode: RunningMode = RunningMode.LIVE_STREAM,
     val context: Context,
     val handLandmarkerHelperListener: LandmarkerListener? = null
 ) {
