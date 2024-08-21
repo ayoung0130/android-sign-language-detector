@@ -1,5 +1,6 @@
 package com.example.sign_language_detector.ui.camera
 
+import android.content.Context
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -33,8 +34,8 @@ class CameraViewModel(
         return landmarkProcessor.anglePose(poseLandmark)
     }
 
-    fun updatePredictedWord(data: List<FloatArray>) {
-        _predictedWord.postValue(modelPredictProcessor.predict(data))    // 예측된 텍스트를 LiveData로 업데이트
+    fun updatePredictedWord(data: List<FloatArray>, context: Context) {
+        _predictedWord.postValue(modelPredictProcessor.predict(data, context))    // 예측된 텍스트를 LiveData로 업데이트
     }
 
 }

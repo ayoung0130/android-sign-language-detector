@@ -21,30 +21,37 @@ class LandmarkProcessor {
     }
 
     private fun calculateAngles(joints: Array<FloatArray>, v1Indices: Array<Int>, v2Indices: Array<Int>): FloatArray {
-        val v = Array(v1Indices.size) { FloatArray(2) }
-        for (i in v.indices) {
-            v[i][0] = joints[v2Indices[i]][0] - joints[v1Indices[i]][0] // x좌표 차이
-            v[i][1] = joints[v2Indices[i]][1] - joints[v1Indices[i]][1] // y좌표 차이
+        // 각 관절 간의 벡터 계산
+        val v = Array(v1Indices.size) { i ->
+            FloatArray(3) { j ->
+                joints[v2Indices[i]][j] - joints[v1Indices[i]][j]
+            }
         }
 
-        val normV = v.map { sqrt(it[0] * it[0] + it[1] * it[1]) }
-        return if (normV.all { it == 0f }) {
-            FloatArray(15)
-        } else {
-            for (i in v.indices) {
-                if (normV[i] != 0f) {
-                    v[i][0] /= normV[i]
-                    v[i][1] /= normV[i]
-                }
-            }
+        // 벡터 정규화 및 각도 계산
+        val angles = FloatArray(15)
+        val angleIndices = arrayOf(
+            0, 1, 2, 4, 5, 6, 8, 9, 10,
+            12, 13, 14, 16, 17, 18
+        )
 
-            val dotProduct = FloatArray(15)
-            for (i in 0 until 15) {
-                dotProduct[i] = (v[i][0] * v[i + 1][0] + v[i][1] * v[i + 1][1])
-                    .coerceIn(-1.0f, 1.0f)
-            }
+        for (i in angleIndices.indices) {
+            val idx = angleIndices[i]
+            val v1 = v[idx]
+            val v2 = v[idx + 1]
 
-            FloatArray(15) { i -> acos(dotProduct[i]) }
+            val normV1 = sqrt(v1.map { it * it }.sum())
+            val normV2 = sqrt(v2.map { it * it }.sum())
+
+            if (normV1 == 0f || normV2 == 0f) {
+                angles[i] = 0f
+            } else {
+                val dotProduct = v1.zip(v2).sumOf { (a, b) -> (a * b).toDouble() }.toFloat() / (normV1 * normV2)
+                val clippedDotProduct = dotProduct.coerceIn(-1f, 1f)
+                angles[i] = acos(clippedDotProduct)
+            }
         }
+
+        return angles
     }
 }

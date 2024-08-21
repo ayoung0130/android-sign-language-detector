@@ -4,6 +4,7 @@ import android.content.Context
 import android.util.Log
 import org.tensorflow.lite.Interpreter
 import java.io.BufferedReader
+import java.io.File
 import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
@@ -17,12 +18,6 @@ class ModelPredictProcessor(context: Context) {
         tflite = Interpreter(model)
     }
 
-    fun loadAndPredict(context: Context, fileName: String): String {
-        // 텍스트 파일에서 데이터를 읽어 FloatArray로 변환
-        val inputData = loadInputDataFromTxt(context, fileName)
-        return predict(inputData)
-    }
-
     private fun loadModelFile(context: Context, modelFileName: String): ByteBuffer {
         val fileDescriptor = context.assets.openFd(modelFileName)
         val inputStream = fileDescriptor.createInputStream()
@@ -34,7 +29,7 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<FloatArray>): String {
+    fun predict(data: List<FloatArray>, context: Context): String {
         // 전체 시퀀스를 생성
         val inputSequences = createSequences(data, 15, 15)
 
@@ -44,8 +39,12 @@ class ModelPredictProcessor(context: Context) {
         }
         val outputArray = Array(inputSequences.size) { FloatArray(actions.size) }
 
-        // 모델에 전체 시퀀스를 한 번에 전달하여 예측 수행
-        tflite.runForMultipleInputsOutputs(arrayOf(inputArray), mapOf(0 to outputArray))
+//        // inputArray를 텍스트 파일로 저장
+//        saveInputArrayToTextFile(data, "data_android.txt", context)
+//        Log.d("ModelPredictProcessor", "저장완료")
+
+        // 모델에 전체 시퀀스를 전달하여 예측 수행
+        tflite.run(inputArray, outputArray)
 
         // outputArray의 내용을 로그로 출력
         outputArray.forEachIndexed { index, output ->
@@ -68,19 +67,6 @@ class ModelPredictProcessor(context: Context) {
         return actions[finalPrediction!!]
     }
 
-    private fun loadInputDataFromTxt(context: Context, fileName: String): List<FloatArray> {
-        val inputData = mutableListOf<FloatArray>()
-        context.assets.open(fileName).use { inputStream ->
-            BufferedReader(InputStreamReader(inputStream)).useLines { lines ->
-                lines.forEach { line ->
-                    val values = line.split(",").map { it.toFloat() }.toFloatArray()
-                    inputData.add(values)
-                }
-            }
-        }
-        return inputData
-    }
-
     private fun createSequences(
         data: List<FloatArray>,
         sequenceLength: Int,
@@ -91,7 +77,7 @@ class ModelPredictProcessor(context: Context) {
         val sequences = mutableListOf<List<FloatArray>>()
         for (i in 0..data.size - sequenceLength step jumpingWindow) {
             val sequence = data.subList(i, i + sequenceLength)
-            Log.d("ModelPredictProcessor", "window: $i, ${i+sequenceLength}")
+            Log.d("ModelPredictProcessor", "window: $i, ${i + sequenceLength}")
             sequences.add(sequence)
 
             // 배열의 내용을 출력하도록 수정
@@ -111,6 +97,20 @@ class ModelPredictProcessor(context: Context) {
         }
         return maxIndex
     }
+
+//    private fun saveInputArrayToTextFile(
+//        inputArray: List<FloatArray>,
+//        fileName: String,
+//        context: Context
+//    ) {
+//        val file = File(context.filesDir, fileName)
+//        file.printWriter().use { out ->
+//            inputArray.forEach { floatArray ->
+//                out.println(floatArray.joinToString(","))
+//            }
+//        }
+//        Log.d("ModelPredictProcessor", "Input array saved to: ${file.absolutePath}")
+//    }
 
     companion object {
         val actions = arrayOf("가렵다", "기절", "부러지다", "어제", "어지러움", "열나다", "오늘", "진통제", "창백하다", "토하다")
