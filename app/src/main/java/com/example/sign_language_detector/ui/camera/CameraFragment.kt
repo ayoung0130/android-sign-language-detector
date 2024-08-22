@@ -153,20 +153,19 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         }
 
         // 버튼 클릭에 따른 네비게이션 설정
-        viewModel.navigateToHome = {
-            findNavController().navigateUp()
-        }
-
-        viewModel.navigateToQuestions = {
-            findNavController().navigate(R.id.action_camera_to_questions)
-        }
-
-        viewModel.navigateToSignLanguage = {
-            findNavController().navigate(R.id.action_camera_to_sign_language)
-        }
-
-        viewModel.navigateBack = {
-            findNavController().navigateUp()
+        with(viewModel){
+            navigateToHome = {
+                findNavController().navigateUp()
+            }
+            navigateToQuestions = {
+                findNavController().navigate(R.id.action_camera_to_questions)
+            }
+            navigateToSignLanguage = {
+                findNavController().navigate(R.id.action_camera_to_sign_language)
+            }
+            navigateBack = {
+                findNavController().navigateUp()
+            }
         }
     }
 

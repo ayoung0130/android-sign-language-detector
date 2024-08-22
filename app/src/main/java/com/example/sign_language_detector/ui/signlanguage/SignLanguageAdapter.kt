@@ -1,7 +1,9 @@
 package com.example.sign_language_detector.ui.signlanguage
 
+import android.media.MediaMetadataRetriever
 import android.net.Uri
 import android.view.LayoutInflater
+import android.view.View
 import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
@@ -9,7 +11,7 @@ import androidx.recyclerview.widget.RecyclerView
 import com.example.sign_language_detector.databinding.ItemSignLanguageBinding
 
 class SignLanguageAdapter :
-    ListAdapter<Uri, SignLanguageAdapter.SignLanguageViewHolder>(DIFF_CALLBACK) {
+    ListAdapter<SignLanguageItem, SignLanguageAdapter.SignLanguageViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SignLanguageViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
@@ -18,31 +20,56 @@ class SignLanguageAdapter :
     }
 
     override fun onBindViewHolder(holder: SignLanguageViewHolder, position: Int) {
-        val videoUri = getItem(position)
-        holder.bind(videoUri)
+        val signLanguageItem = getItem(position)
+        holder.bind(signLanguageItem)
     }
 
     class SignLanguageViewHolder(private val binding: ItemSignLanguageBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
-        fun bind(videoUri: Uri) {
-            binding.videoUri = videoUri
+        fun bind(signLanguageItem: SignLanguageItem) {
+            binding.signLanguageItem = signLanguageItem
 
-            // Play 버튼 클릭 시 영상 재생
+            // MediaMetadataRetriever를 사용하여 동영상의 특정 프레임을 미리보기로 표시
+            val retriever = MediaMetadataRetriever()
+            retriever.setDataSource(binding.root.context, signLanguageItem.videoUri)
+            val bitmap = retriever.getFrameAtTime(
+                5L,
+                MediaMetadataRetriever.OPTION_CLOSEST_SYNC
+            ) // timeUs초 지점의 프레임
+            binding.videoPreviewImage.setImageBitmap(bitmap)
+
+            retriever.release()
+
+            // Play 버튼 클릭 시 VideoView를 사용해 영상 재생
             binding.playButton.setOnClickListener {
-                binding.signLanguageVideoView.setVideoURI(videoUri)
+                binding.signLanguageVideoView.visibility = View.VISIBLE
+                binding.videoPreviewImage.visibility = View.GONE
+                binding.signLanguageVideoView.setVideoURI(signLanguageItem.videoUri)
                 binding.signLanguageVideoView.start()
+            }
+
+            // 비디오 재생 완료 이벤트 처리
+            binding.signLanguageVideoView.setOnCompletionListener {
+                binding.signLanguageVideoView.visibility = View.GONE
+                binding.videoPreviewImage.visibility = View.VISIBLE
             }
         }
     }
 
     companion object {
-        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<Uri>() {
-            override fun areItemsTheSame(oldItem: Uri, newItem: Uri): Boolean {
-                return oldItem == newItem
+        private val DIFF_CALLBACK = object : DiffUtil.ItemCallback<SignLanguageItem>() {
+            override fun areItemsTheSame(
+                oldItem: SignLanguageItem,
+                newItem: SignLanguageItem
+            ): Boolean {
+                return oldItem.videoUri == newItem.videoUri
             }
 
-            override fun areContentsTheSame(oldItem: Uri, newItem: Uri): Boolean {
+            override fun areContentsTheSame(
+                oldItem: SignLanguageItem,
+                newItem: SignLanguageItem
+            ): Boolean {
                 return oldItem == newItem
             }
         }

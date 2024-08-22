@@ -7,6 +7,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
+import androidx.fragment.app.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import com.example.sign_language_detector.R
@@ -15,14 +16,13 @@ import com.example.sign_language_detector.databinding.FragmentSignLanguageBindin
 class SignLanguageFragment : Fragment() {
 
     private lateinit var binding: FragmentSignLanguageBinding
-    private lateinit var viewModel: SignLanguageViewModel
+    private val viewModel: SignLanguageViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
         binding = FragmentSignLanguageBinding.inflate(inflater, container, false)
-        viewModel = ViewModelProvider(this)[SignLanguageViewModel::class.java]
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
@@ -37,17 +37,10 @@ class SignLanguageFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         setupRecyclerView()
+        viewModel.loadSignLanguageItems(requireContext())
     }
 
     private fun setupRecyclerView() {
         binding.signLanguageRecyclerView.adapter = viewModel.adapter
-
-        // 예시 데이터 추가
-        viewModel.setVideoUris(
-            listOf(
-                Uri.parse("android.resource://${requireActivity().packageName}/raw/index_0"),
-                Uri.parse("android.resource://${requireActivity().packageName}/raw/index_0")
-            )
-        )
     }
 }

@@ -26,12 +26,13 @@ class HomeFragment : Fragment() {
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 
-        viewModel.navigateToQuestions = {
-            findNavController().navigate(R.id.action_home_to_questions)
-        }
-
-        viewModel.navigateToCamera = {
-            findNavController().navigate(R.id.action_home_to_camera)
+        with(viewModel){
+            navigateToQuestions = {
+                findNavController().navigate(R.id.action_home_to_questions)
+            }
+            navigateToCamera = {
+                findNavController().navigate(R.id.action_home_to_camera)
+            }
         }
 
         return binding.root
