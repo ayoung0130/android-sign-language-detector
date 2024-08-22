@@ -18,6 +18,7 @@ class CameraViewModel(
     var navigateToHome: (() -> Unit)? = null
     var navigateToQuestions: (() -> Unit)? = null
     var navigateToSignLanguage: (() -> Unit)? = null
+    var navigateBack: (() -> Unit)? = null
 
     fun onHomeButtonClick() {
         navigateToHome?.invoke()
@@ -29,6 +30,10 @@ class CameraViewModel(
 
     fun onSignLanguageButtonClick(){
         navigateToSignLanguage?.invoke()
+    }
+
+    fun onBackButtonClick() {
+        navigateBack?.invoke()
     }
 
     private val _predictedWord = MutableLiveData<String>()

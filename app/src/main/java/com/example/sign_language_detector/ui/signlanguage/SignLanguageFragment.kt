@@ -28,16 +28,8 @@ class SignLanguageFragment : Fragment() {
 
         // ViewModel의 navigateBack 콜백 설정
         viewModel.navigateBack = {
-            findNavController().navigate(R.id.action_sign_language_to_camera)
+            findNavController().navigateUp()
         }
-
-        // 기기의 뒤로가기 버튼 처리
-        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
-            override fun handleOnBackPressed() {
-                // 여기에서 원하는 액션을 수행합니다.
-                findNavController().navigate(R.id.action_sign_language_to_camera)
-            }
-        })
 
         return binding.root
     }

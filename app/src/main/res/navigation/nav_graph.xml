@@ -4,6 +4,7 @@
     android:id="@+id/nav_graph"
     app:startDestination="@id/splash_fragment">
 
+
     <!-- Splash Fragment -->
     <fragment
         android:id="@+id/splash_fragment"
@@ -16,6 +17,7 @@
             app:popUpTo="@id/splash_fragment"
             app:popUpToInclusive="true" />
     </fragment>
+
 
     <!-- Home Fragment -->
     <fragment
@@ -30,6 +32,7 @@
             android:id="@+id/action_home_to_questions"
             app:destination="@id/questions_fragment" />
     </fragment>
+
 
     <!-- Camera Fragment -->
     <fragment
@@ -62,6 +65,7 @@
             app:popUpToInclusive="true" />
     </fragment>
 
+
     <!-- Questions Fragment -->
     <fragment
         android:id="@+id/questions_fragment"
@@ -74,6 +78,7 @@
             app:popUpTo="@id/camera_fragment"
             app:popUpToInclusive="true" />
     </fragment>
+
 
     <!-- Sign Language Fragment -->
     <fragment

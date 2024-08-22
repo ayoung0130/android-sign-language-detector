@@ -164,6 +164,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         viewModel.navigateToSignLanguage = {
             findNavController().navigate(R.id.action_camera_to_sign_language)
         }
+
+        viewModel.navigateBack = {
+            findNavController().navigateUp()
+        }
     }
 
     // CameraX 초기화 및 카메라 사용 사례 준비
