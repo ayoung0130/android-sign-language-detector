@@ -15,6 +15,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.Navigation
+import androidx.navigation.fragment.findNavController
 import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentCameraBinding
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
@@ -150,6 +151,19 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             // 카메라와 그 사용 사례를 설정
             setUpCamera()
         }
+
+        // 버튼 클릭에 따른 네비게이션 설정
+        viewModel.navigateToHome = {
+            findNavController().navigateUp()
+        }
+
+        viewModel.navigateToQuestions = {
+            findNavController().navigate(R.id.action_camera_to_questions)
+        }
+
+        viewModel.navigateToSignLanguage = {
+            findNavController().navigate(R.id.action_camera_to_sign_language)
+        }
     }
 
     // CameraX 초기화 및 카메라 사용 사례 준비
@@ -221,8 +235,10 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
     private fun processCombinedResults() {
 
-        // 손 랜드마크 데이터가 존재하면 (손 검출시)
-        if (handResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true) {
+        // 손과 포즈 랜드마크 데이터가 존재하면 (손/포즈 동시 검출시)
+        if (handResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true &&
+            poseResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true
+        ) {
 
             val jointLeftHands = Array(21) { FloatArray(3) }
             val jointRightHands = Array(21) { FloatArray(3) }
@@ -230,14 +246,12 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
             handResultBundle!!.results.forEach { result ->
                 result.landmarks().forEachIndexed { i, hand ->
-                    val handedness = result.handedness()[i].first().categoryName()
-
                     // 손의 핸디드니스에 따라 적절한 배열에 값을 저장
-                    if (handedness == "Left") {
+                    if (result.handedness()[i].first().categoryName() == "Left") {
                         hand.forEachIndexed { j, lm ->
                             jointRightHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
                         }
-                    } else if (handedness == "Right") {
+                    } else {
                         hand.forEachIndexed { j, lm ->
                             jointLeftHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
                         }
@@ -274,10 +288,13 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             storedLandmarkData.add(data)
             Log.d("tag", "storedData size: ${storedLandmarkData.size}")
 
-        } else {
+        } else if (storedLandmarkData.isNotEmpty()) {
             if (storedLandmarkData.size > 15) {
                 Log.d("tag", "손 내려감! 예측 수행")
                 viewModel.updatePredictedWord(storedLandmarkData, requireContext())
+                storedLandmarkData.clear()
+            } else {
+                Toast.makeText(context, "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
                 storedLandmarkData.clear()
             }
         }

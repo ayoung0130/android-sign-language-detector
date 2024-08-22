@@ -39,16 +39,27 @@
 
         <action
             android:id="@+id/action_camera_to_home"
-            app:destination="@id/home_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/home_fragment" />
         <action
             android:id="@+id/action_camera_to_questions"
-            app:destination="@id/questions_fragment"
-            app:enterAnim="@anim/slide_in_up"
-            app:exitAnim="@anim/slide_out_down"
-            app:popEnterAnim="@anim/slide_in_up"
-            app:popExitAnim="@anim/slide_out_down" />
+            app:destination="@id/questions_fragment" />
+        <action
+            android:id="@+id/action_camera_to_sign_language"
+            app:destination="@id/sign_language_fragment" />
+
+        <!-- Questions에서 Camera로 이동 (뒤로 가기) -->
+        <action
+            android:id="@+id/action_questions_to_camera"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
+
+        <!-- Sign Language에서 Camera로 이동 (뒤로 가기) -->
+        <action
+            android:id="@+id/action_sign_language_to_camera"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
     </fragment>
 
     <!-- Questions Fragment -->
@@ -58,7 +69,21 @@
         android:label="QuestionsFragment">
 
         <action
-            android:id="@+id/action_questions_to_home"
-            app:destination="@id/home_fragment" />
+            android:id="@+id/action_questions_to_camera"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
+    </fragment>
+
+    <!-- Sign Language Fragment -->
+    <fragment
+        android:id="@+id/sign_language_fragment"
+        android:name="com.example.sign_language_detector.ui.signlanguage.SignLanguageFragment"
+        android:label="SignLanguageFragment" >
+        <action
+            android:id="@+id/action_sign_language_to_camera"
+            app:destination="@id/camera_fragment"
+            app:popUpTo="@id/camera_fragment"
+            app:popUpToInclusive="true" />
     </fragment>
 </navigation>

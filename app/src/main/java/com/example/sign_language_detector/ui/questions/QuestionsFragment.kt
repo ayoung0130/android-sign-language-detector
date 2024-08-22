@@ -4,10 +4,12 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.OnBackPressedCallback
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
+import com.example.sign_language_detector.R
 import com.example.sign_language_detector.databinding.FragmentQuestionsBinding
 
 class QuestionsFragment : Fragment() {
@@ -28,8 +30,16 @@ class QuestionsFragment : Fragment() {
 
         // ViewModel의 navigateBack 콜백 설정
         viewModel.navigateBack = {
-            findNavController().popBackStack()
+            findNavController().navigate(R.id.action_questions_to_camera)
         }
+
+        // 기기의 뒤로가기 버튼 처리
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner, object : OnBackPressedCallback(true) {
+            override fun handleOnBackPressed() {
+                // 여기에서 원하는 액션을 수행합니다.
+                findNavController().navigate(R.id.action_questions_to_camera)
+            }
+        })
 
         return binding.root
     }

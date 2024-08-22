@@ -15,6 +15,22 @@ class CameraViewModel(
     private val modelPredictProcessor: ModelPredictProcessor
 ) : ViewModel() {
 
+    var navigateToHome: (() -> Unit)? = null
+    var navigateToQuestions: (() -> Unit)? = null
+    var navigateToSignLanguage: (() -> Unit)? = null
+
+    fun onHomeButtonClick() {
+        navigateToHome?.invoke()
+    }
+
+    fun onQuestionButtonClick() {
+        navigateToQuestions?.invoke()
+    }
+
+    fun onSignLanguageButtonClick(){
+        navigateToSignLanguage?.invoke()
+    }
+
     private val _predictedWord = MutableLiveData<String>()
     val predictedWord: LiveData<String> get() = _predictedWord
 

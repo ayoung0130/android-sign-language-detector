@@ -12,30 +12,37 @@ class DetectUseCase(
     private val poseLandmarkerHelper: PoseLandmarkerHelper,
     private val executor: ExecutorService
 ) {
-
     fun detectHand(imageProxy: ImageProxy, isFrontCamera: Boolean) {
-        executor.execute {
-            try {
-                handLandmarkerHelper.detectLiveStream(
-                    imageProxy = imageProxy,
-                    isFrontCamera = isFrontCamera
-                )
-            } catch (e: Exception) {
-                Log.e("DetectHandUseCase", "Hand detection failed", e)
+        if (!executor.isShutdown && !executor.isTerminated) {
+            executor.execute {
+                try {
+                    handLandmarkerHelper.detectLiveStream(
+                        imageProxy = imageProxy,
+                        isFrontCamera = isFrontCamera
+                    )
+                } catch (e: Exception) {
+                    Log.e("DetectHandUseCase", "Hand detection failed", e)
+                }
             }
+        } else {
+            Log.e("DetectHandUseCase", "Executor is shut down, cannot execute task.")
         }
     }
 
     fun detectPose(imageProxy: ImageProxy, isFrontCamera: Boolean) {
-        executor.execute {
-            try {
-                poseLandmarkerHelper.detectLiveStream(
-                    imageProxy = imageProxy,
-                    isFrontCamera = isFrontCamera
-                )
-            } catch (e: Exception) {
-                Log.e("DetectPoseUseCase", "Pose detection failed", e)
+        if (!executor.isShutdown && !executor.isTerminated) {
+            executor.execute {
+                try {
+                    poseLandmarkerHelper.detectLiveStream(
+                        imageProxy = imageProxy,
+                        isFrontCamera = isFrontCamera
+                    )
+                } catch (e: Exception) {
+                    Log.e("DetectPoseUseCase", "Pose detection failed", e)
+                }
             }
+        } else {
+            Log.e("DetectPoseUseCase", "Executor is shut down, cannot execute task.")
         }
     }
 }
