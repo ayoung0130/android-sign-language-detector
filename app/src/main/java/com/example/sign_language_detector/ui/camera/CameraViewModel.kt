@@ -2,17 +2,24 @@ package com.example.sign_language_detector.ui.camera
 
 import android.content.Context
 import androidx.camera.core.ImageProxy
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.example.sign_language_detector.repository.HandLandmarkerHelper
+import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
+import com.example.sign_language_detector.util.ProcessTts
+import com.example.sign_language_detector.util.WordsToSentence
+import kotlinx.coroutines.launch
 
 class CameraViewModel(
     private val detectUseCase: DetectUseCase,
     private val landmarkProcessor: LandmarkProcessor,
-    private val modelPredictProcessor: ModelPredictProcessor
+    private val modelPredictProcessor: ModelPredictProcessor,
+    private val wordsToSentence: WordsToSentence,
+    private val processTts: ProcessTts
 ) : ViewModel() {
 
     var navigateToHome: (() -> Unit)? = null
@@ -28,7 +35,7 @@ class CameraViewModel(
         navigateToQuestions?.invoke()
     }
 
-    fun onSignLanguageButtonClick(){
+    fun onSignLanguageButtonClick() {
         navigateToSignLanguage?.invoke()
     }
 
@@ -36,8 +43,8 @@ class CameraViewModel(
         navigateBack?.invoke()
     }
 
-    private val _predictedWord = MutableLiveData<String>()
-    val predictedWord: LiveData<String> get() = _predictedWord
+    private val _predict = MutableLiveData<String?>()
+    val predict: MutableLiveData<String?> get() = _predict
 
     fun detectHand(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         detectUseCase.detectHand(imageProxy, isFrontCamera)
@@ -47,16 +54,30 @@ class CameraViewModel(
         detectUseCase.detectPose(imageProxy, isFrontCamera)
     }
 
-    fun calculateHandAngle(handLandmark: Array<FloatArray>): FloatArray {
-        return landmarkProcessor.angleHands(handLandmark)
+    fun processLandmarks(
+        handResultBundle: HandLandmarkerHelper.ResultBundle,
+        poseResultBundle: PoseLandmarkerHelper.ResultBundle
+    ): FloatArray {
+        return landmarkProcessor.processLandmarks(handResultBundle, poseResultBundle)
     }
 
-    fun calculatePoseAngle(poseLandmark: Array<FloatArray>): FloatArray {
-        return landmarkProcessor.anglePose(poseLandmark)
+    fun modelPredict(data: List<FloatArray>, context: Context): MutableList<Int> {
+        return modelPredictProcessor.predict(data, context)
     }
 
-    fun updatePredictedWord(data: List<FloatArray>, context: Context) {
-        _predictedWord.postValue(modelPredictProcessor.predict(data, context))    // 예측된 텍스트를 LiveData로 업데이트
+    fun processWords(words: MutableList<Int>) {
+        viewModelScope.launch {
+            // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
+            val finalResult = processAndGenerateSentence(words)
+            if (finalResult != null) {
+                processTts.speak(finalResult)
+            }
+            _predict.postValue(finalResult) // 최종 결과만 LiveData에 설정
+        }
     }
 
+    private suspend fun processAndGenerateSentence(words: MutableList<Int>): String? {
+        val result = wordsToSentence.llm(words)
+        return result?.trim()
+    }
 }

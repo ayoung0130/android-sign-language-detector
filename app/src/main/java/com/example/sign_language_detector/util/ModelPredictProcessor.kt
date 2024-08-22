@@ -29,9 +29,9 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<FloatArray>, context: Context): String {
+    fun predict(data: List<FloatArray>, context: Context): MutableList<Int> {
         // 전체 시퀀스를 생성
-        val inputSequences = createSequences(data, 15, 15)
+        val inputSequences = createSequences(data, 15, 5)
 
         // TFLite 모델에 입력할 배열 준비
         val inputArray = Array(inputSequences.size) { index ->
@@ -56,15 +56,9 @@ class ModelPredictProcessor(context: Context) {
         for (output in outputArray) {
             predictions.add(output.indexOfMax())
         }
-
         Log.d("ModelPredictProcessor", "predictions: $predictions")
 
-        // 최종 예측 결정
-        val finalPrediction =
-            predictions.groupingBy { it }.eachCount().maxByOrNull { it.value }?.key
-        Log.d("ModelPredictProcessor", "finalPrediction: $finalPrediction")
-
-        return actions[finalPrediction!!]
+        return predictions
     }
 
     private fun createSequences(

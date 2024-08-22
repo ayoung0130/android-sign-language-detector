@@ -25,11 +25,12 @@ import com.example.sign_language_detector.usecase.CameraUseCase
 import com.example.sign_language_detector.usecase.DetectUseCase
 import com.example.sign_language_detector.util.LandmarkProcessor
 import com.example.sign_language_detector.util.ModelPredictProcessor
+import com.example.sign_language_detector.util.ProcessTts
+import com.example.sign_language_detector.util.WordsToSentence
 import com.google.mediapipe.tasks.vision.core.RunningMode
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import java.util.concurrent.TimeUnit
-import kotlin.math.min
 
 class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     PoseLandmarkerHelper.LandmarkerListener {
@@ -49,10 +50,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
     private var handResultBundle: HandLandmarkerHelper.ResultBundle? = null
     private var poseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
-
-    private val poseLandmarkIndices = listOf(
-        0, 2, 5, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24
-    )
 
     private val storedLandmarkData = mutableListOf<FloatArray>()
 
@@ -137,8 +134,16 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         )
         val landmarkProcessor = LandmarkProcessor()
         val modelPredictProcessor = ModelPredictProcessor(requireContext())
+        val wordsToSentence = WordsToSentence()
+        val processTts = ProcessTts(requireContext())
         val factory =
-            CameraViewModelFactory(detectUseCase, landmarkProcessor, modelPredictProcessor)
+            CameraViewModelFactory(
+                detectUseCase,
+                landmarkProcessor,
+                modelPredictProcessor,
+                wordsToSentence,
+                processTts
+            )
         viewModel = ViewModelProvider(this, factory)[CameraViewModel::class.java]
 
         fragmentCameraBinding.viewModel = viewModel
@@ -153,7 +158,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         }
 
         // 버튼 클릭에 따른 네비게이션 설정
-        with(viewModel){
+        with(viewModel) {
             navigateToHome = {
                 findNavController().navigateUp()
             }
@@ -237,64 +242,24 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     }
 
     private fun processCombinedResults() {
-
         // 손과 포즈 랜드마크 데이터가 존재하면 (손/포즈 동시 검출시)
         if (handResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true &&
             poseResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true
         ) {
+            val processedLandmarks =
+                viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
 
-            val jointLeftHands = Array(21) { FloatArray(3) }
-            val jointRightHands = Array(21) { FloatArray(3) }
-            val jointPose = Array(21) { FloatArray(3) }
-
-            handResultBundle!!.results.forEach { result ->
-                result.landmarks().forEachIndexed { i, hand ->
-                    // 손의 핸디드니스에 따라 적절한 배열에 값을 저장
-                    if (result.handedness()[i].first().categoryName() == "Left") {
-                        hand.forEachIndexed { j, lm ->
-                            jointRightHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
-                        }
-                    } else {
-                        hand.forEachIndexed { j, lm ->
-                            jointLeftHands[j] = floatArrayOf(lm.x(), lm.y(), lm.z())
-                        }
-                    }
-                }
-            }
-
-            poseResultBundle!!.results.forEach { result ->
-                result.landmarks().forEachIndexed { _, pose ->
-                    pose.forEachIndexed { j, lm ->
-                        if (j in poseLandmarkIndices) {
-                            jointPose[poseLandmarkIndices.indexOf(j)] = floatArrayOf(
-                                lm.x(), lm.y(), lm.z()
-                            )
-                        }
-                    }
-                }
-            }
-
-            val leftHandAngle = viewModel.calculateHandAngle(jointLeftHands)
-            val rightHandAngle = viewModel.calculateHandAngle(jointRightHands)
-            val poseAngle = viewModel.calculatePoseAngle(jointPose)
-
-            // 모든 랜드마크와 각도 데이터를 하나의 배열로 결합
-            val jointData = (jointLeftHands.flatMap { it.toList() } +
-                    jointRightHands.flatMap { it.toList() } +
-                    jointPose.flatMap { it.toList() }).toFloatArray()
-
-            val data =
-                (jointData + leftHandAngle + rightHandAngle + poseAngle)
-
-            Log.d("tag", "data size: ${data.size}")
-
-            storedLandmarkData.add(data)
+            storedLandmarkData.add(processedLandmarks)
             Log.d("tag", "storedData size: ${storedLandmarkData.size}")
 
         } else if (storedLandmarkData.isNotEmpty()) {
             if (storedLandmarkData.size > 15) {
                 Log.d("tag", "손 내려감! 예측 수행")
-                viewModel.updatePredictedWord(storedLandmarkData, requireContext())
+
+                val predictedLabel = viewModel.modelPredict(storedLandmarkData, requireContext())
+
+                viewModel.processWords(predictedLabel)
+
                 storedLandmarkData.clear()
             } else {
                 Toast.makeText(context, "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()

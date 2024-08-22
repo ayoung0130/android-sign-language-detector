@@ -66,7 +66,7 @@ class LandmarkProcessor {
     }
 
     // 각도 처리
-    fun angleHands(jointHands: Array<FloatArray>): FloatArray {
+    private fun angleHands(jointHands: Array<FloatArray>): FloatArray {
         val v1Indices = arrayOf(0, 1, 2, 3, 0, 5, 6, 7, 0, 9, 10, 11, 0, 13, 14, 15, 0, 17, 18, 19)
         val v2Indices =
             arrayOf(1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20)
@@ -74,7 +74,7 @@ class LandmarkProcessor {
         return calculateAngles(jointHands, v1Indices, v2Indices)
     }
 
-    fun anglePose(jointPose: Array<FloatArray>): FloatArray {
+    private fun anglePose(jointPose: Array<FloatArray>): FloatArray {
         val v1Indices = arrayOf(0, 2, 0, 1, 0, 0, 7, 8, 8, 8, 10, 12, 12, 12, 7, 7, 9, 11, 11, 11)
         val v2Indices =
             arrayOf(2, 4, 1, 3, 5, 6, 8, 7, 10, 20, 12, 14, 16, 18, 9, 19, 11, 13, 15, 17)

@@ -18,11 +18,11 @@ class QuestionsViewModel : ViewModel() {
         // Sample questions
         _symptomQuestions.value = listOf(
             "어디가 아파서 오셨어요?",
-            "증상이 언제부터 시작됐나요?",
-            "다른 증상은 없으신가요?"
+            "다른 증상은 없으신가요?",
+            "질문 추가 예정"
         )
         _diagnosisQuestions.value = listOf(
-            "현재 어떤 약을 복용 중이신가요?",
+            "언제부터 증상이 시작됐나요?",
             "과거 병력이 있으신가요?",
             "질문 추가 예정"
         )

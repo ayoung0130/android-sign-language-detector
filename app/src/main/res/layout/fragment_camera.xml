@@ -65,7 +65,7 @@
             android:backgroundTint="@color/light_black"
             android:gravity="center"
             android:padding="16dp"
-            android:text="@{viewModel.predictedWord}"
+            android:text="@{viewModel.predict}"
             android:textColor="@android:color/white"
             android:textSize="16sp"
             android:textStyle="bold" />
