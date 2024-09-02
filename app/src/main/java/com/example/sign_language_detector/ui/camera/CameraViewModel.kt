@@ -1,6 +1,6 @@
 package com.example.sign_language_detector.ui.camera
 
-import android.content.Context
+import android.util.Log
 import androidx.camera.core.ImageProxy
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -61,11 +61,11 @@ class CameraViewModel(
         return landmarkProcessor.processLandmarks(handResultBundle, poseResultBundle)
     }
 
-    fun modelPredict(data: List<FloatArray>, context: Context): MutableList<Int> {
-        return modelPredictProcessor.predict(data, context)
+    fun modelPredict(data: List<FloatArray>): MutableList<String> {
+        return modelPredictProcessor.predict(data)
     }
 
-    fun processWords(words: MutableList<Int>) {
+    fun processWords(words: MutableList<String>) {
         viewModelScope.launch {
             // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
             val finalResult = processAndGenerateSentence(words)
@@ -76,7 +76,8 @@ class CameraViewModel(
         }
     }
 
-    private suspend fun processAndGenerateSentence(words: MutableList<Int>): String? {
+    private suspend fun processAndGenerateSentence(words: MutableList<String>): String? {
+        Log.d("tag", "단어 리스트: $words")
         val result = wordsToSentence.llm(words)
         return result?.trim()
     }

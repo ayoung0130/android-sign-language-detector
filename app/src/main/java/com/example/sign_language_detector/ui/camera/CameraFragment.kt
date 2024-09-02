@@ -256,9 +256,9 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             if (storedLandmarkData.size > 15) {
                 Log.d("tag", "손 내려감! 예측 수행")
 
-                val predictedLabel = viewModel.modelPredict(storedLandmarkData, requireContext())
+                val predictedWords = viewModel.modelPredict(storedLandmarkData)
 
-                viewModel.processWords(predictedLabel)
+                viewModel.processWords(predictedWords)
 
                 storedLandmarkData.clear()
             } else {

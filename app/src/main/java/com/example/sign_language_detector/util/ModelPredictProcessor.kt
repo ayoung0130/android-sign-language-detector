@@ -3,9 +3,6 @@ package com.example.sign_language_detector.util
 import android.content.Context
 import android.util.Log
 import org.tensorflow.lite.Interpreter
-import java.io.BufferedReader
-import java.io.File
-import java.io.InputStreamReader
 import java.nio.ByteBuffer
 import java.nio.ByteOrder
 
@@ -29,7 +26,7 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<FloatArray>, context: Context): MutableList<Int> {
+    fun predict(data: List<FloatArray>): MutableList<String> {
         // 전체 시퀀스를 생성
         val inputSequences = createSequences(data, 15, 5)
 
@@ -38,10 +35,6 @@ class ModelPredictProcessor(context: Context) {
             inputSequences[index].toTypedArray()
         }
         val outputArray = Array(inputSequences.size) { FloatArray(actions.size) }
-
-//        // inputArray를 텍스트 파일로 저장
-//        saveInputArrayToTextFile(data, "data_android.txt", context)
-//        Log.d("ModelPredictProcessor", "저장완료")
 
         // 모델에 전체 시퀀스를 전달하여 예측 수행
         tflite.run(inputArray, outputArray)
@@ -58,7 +51,8 @@ class ModelPredictProcessor(context: Context) {
         }
         Log.d("ModelPredictProcessor", "predictions: $predictions")
 
-        return predictions
+        // 예측된 인덱스를 해당하는 단어로 변환하여 반환
+        return predictions.map { index -> actions[index] }.toMutableList()
     }
 
     private fun createSequences(
@@ -91,20 +85,6 @@ class ModelPredictProcessor(context: Context) {
         }
         return maxIndex
     }
-
-//    private fun saveInputArrayToTextFile(
-//        inputArray: List<FloatArray>,
-//        fileName: String,
-//        context: Context
-//    ) {
-//        val file = File(context.filesDir, fileName)
-//        file.printWriter().use { out ->
-//            inputArray.forEach { floatArray ->
-//                out.println(floatArray.joinToString(","))
-//            }
-//        }
-//        Log.d("ModelPredictProcessor", "Input array saved to: ${file.absolutePath}")
-//    }
 
     companion object {
         val actions = arrayOf("가렵다", "기절", "부러지다", "어제", "어지러움", "열나다", "오늘", "진통제", "창백하다", "토하다")
