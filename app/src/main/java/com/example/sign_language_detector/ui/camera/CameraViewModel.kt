@@ -46,6 +46,9 @@ class CameraViewModel(
     private val _predict = MutableLiveData<String?>()
     val predict: MutableLiveData<String?> get() = _predict
 
+    private val _words = MutableLiveData<String?>()
+    val words: MutableLiveData<String?> get() = _words
+
     fun detectHand(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         detectUseCase.detectHand(imageProxy, isFrontCamera)
     }
@@ -67,6 +70,9 @@ class CameraViewModel(
 
     fun processWords(words: MutableList<String>) {
         viewModelScope.launch {
+            // words 리스트를 한 줄로 표시
+            _words.postValue(words.joinToString(" "))
+
             // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
             val finalResult = processAndGenerateSentence(words)
             if (finalResult != null) {

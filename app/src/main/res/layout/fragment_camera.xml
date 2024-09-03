@@ -44,27 +44,41 @@
         <androidx.camera.view.PreviewView
             android:id="@+id/view_finder"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="470dp"
             android:layout_marginTop="55dp" />
 
         <com.example.sign_language_detector.util.OverlayView
             android:id="@+id/overlay"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
+            android:layout_height="470dp"
             app:layout_anchor="@+id/view_finder"
             app:layout_anchorGravity="center" />
+
+        <!-- 예측한 단어 -->
+        <TextView
+            android:id="@+id/translated_words"
+            android:layout_width="match_parent"
+            android:layout_height="70dp"
+            android:layout_gravity="center_horizontal|bottom"
+            android:layout_marginBottom="160dp"
+            android:background="#80000000"
+            android:backgroundTint="@color/light_black"
+            android:gravity="center"
+            android:text="@{viewModel.words}"
+            android:textColor="@android:color/white"
+            android:textSize="16sp"
+            android:textStyle="bold" />
 
         <!-- 통역된 텍스트 -->
         <TextView
             android:id="@+id/translated_text"
             android:layout_width="match_parent"
-            android:layout_height="120dp"
+            android:layout_height="70dp"
             android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="85dp"
+            android:layout_marginBottom="90dp"
             android:background="#80000000"
             android:backgroundTint="@color/light_black"
             android:gravity="center"
-            android:padding="16dp"
             android:text="@{viewModel.predict}"
             android:textColor="@android:color/white"
             android:textSize="16sp"
