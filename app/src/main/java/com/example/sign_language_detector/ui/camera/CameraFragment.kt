@@ -246,6 +246,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         if (handResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true &&
             poseResultBundle?.results?.first()?.landmarks()?.isNotEmpty() == true
         ) {
+            viewModel.onBothDetected(true)
+
             val processedLandmarks =
                 viewModel.processLandmarks(handResultBundle!!, poseResultBundle!!)
 
@@ -257,14 +259,13 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 Log.d("tag", "손 내려감! 예측 수행")
 
                 val predictedWords = viewModel.modelPredict(storedLandmarkData)
-
                 viewModel.processWords(predictedWords)
 
-                storedLandmarkData.clear()
             } else {
                 Toast.makeText(context, "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
-                storedLandmarkData.clear()
             }
+            viewModel.onBothDetected(false)
+            storedLandmarkData.clear()
         }
     }
 

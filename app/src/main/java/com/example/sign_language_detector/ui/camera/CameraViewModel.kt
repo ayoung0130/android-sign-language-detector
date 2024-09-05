@@ -2,9 +2,11 @@ package com.example.sign_language_detector.ui.camera
 
 import android.util.Log
 import androidx.camera.core.ImageProxy
+import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.sign_language_detector.R
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
 import com.example.sign_language_detector.usecase.DetectUseCase
@@ -48,6 +50,18 @@ class CameraViewModel(
 
     private val _words = MutableLiveData<String?>()
     val words: MutableLiveData<String?> get() = _words
+
+    // 램프 색상 상태 (true: 손/포즈 동시 검출, false: 미검출 상태)
+    private val _isBothDetected = MutableLiveData<Boolean>()
+    val isBothDetected: LiveData<Boolean> get() = _isBothDetected
+
+    init {
+        _isBothDetected.value = false // 초기 상태: 미검출 (false)
+    }
+
+    fun onBothDetected(isDetected: Boolean) {
+        _isBothDetected.value = isDetected
+    }
 
     fun detectHand(imageProxy: ImageProxy, isFrontCamera: Boolean) {
         detectUseCase.detectHand(imageProxy, isFrontCamera)

@@ -9,122 +9,155 @@
             type="com.example.sign_language_detector.ui.camera.CameraViewModel" />
     </data>
 
-    <androidx.coordinatorlayout.widget.CoordinatorLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
         android:id="@+id/camera_container"
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <!-- 상단 바 -->
-        <RelativeLayout
+        <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/top_bar"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="wrap_content"
             android:background="@color/light_beige"
             android:padding="16dp"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
             <ImageView
                 android:id="@+id/back_button"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:onClick="@{()-> viewModel.onBackButtonClick()}"
                 android:contentDescription="@string/back_button"
-                android:src="@drawable/ic_back" />
+                android:onClick="@{()-> viewModel.onBackButtonClick()}"
+                android:src="@drawable/ic_back"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
 
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_centerInParent="true"
                 android:text="@string/sample_question"
                 android:textSize="18sp"
-                android:textStyle="bold" />
-        </RelativeLayout>
+                android:textStyle="bold"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toEndOf="@id/back_button"
+                app:layout_constraintTop_toTopOf="parent" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <!-- 카메라 화면 -->
         <androidx.camera.view.PreviewView
             android:id="@+id/view_finder"
-            android:layout_width="match_parent"
-            android:layout_height="470dp"
-            android:layout_marginTop="55dp" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/translated_words"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
         <com.example.sign_language_detector.util.OverlayView
             android:id="@+id/overlay"
-            android:layout_width="match_parent"
-            android:layout_height="470dp"
-            app:layout_anchor="@+id/view_finder"
-            app:layout_anchorGravity="center" />
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            app:layout_constraintBottom_toBottomOf="@id/view_finder"
+            app:layout_constraintEnd_toEndOf="@id/view_finder"
+            app:layout_constraintStart_toStartOf="@id/view_finder"
+            app:layout_constraintTop_toTopOf="@id/view_finder" />
+
+        <!-- 카메라 화면 위에 놓인 원형 램프 이미지 -->
+        <ImageView
+            android:id="@+id/lamp_image"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
+            android:layout_marginTop="10dp"
+            android:elevation="10dp"
+            android:scaleType="centerCrop"
+            android:src="@{viewModel.isBothDetected ? @drawable/lamp_green : @drawable/lamp_red}"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="@id/view_finder" />
 
         <!-- 예측한 단어 -->
         <TextView
             android:id="@+id/translated_words"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="70dp"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="160dp"
             android:background="#80000000"
             android:backgroundTint="@color/light_black"
             android:gravity="center"
             android:text="@{viewModel.words}"
             android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/translated_text"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/view_finder" />
 
         <!-- 통역된 텍스트 -->
         <TextView
             android:id="@+id/translated_text"
-            android:layout_width="match_parent"
+            android:layout_width="0dp"
             android:layout_height="70dp"
-            android:layout_gravity="center_horizontal|bottom"
-            android:layout_marginBottom="90dp"
             android:background="#80000000"
             android:backgroundTint="@color/light_black"
             android:gravity="center"
             android:text="@{viewModel.predict}"
             android:textColor="@android:color/white"
-            android:textSize="16sp"
-            android:textStyle="bold" />
+            android:textSize="18sp"
+            android:textStyle="bold"
+            app:layout_constraintBottom_toTopOf="@id/bottom_bar"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/translated_words" />
 
         <!-- 하단 바 -->
         <LinearLayout
             android:id="@+id/bottom_bar"
-            android:layout_width="match_parent"
-            android:layout_height="100dp"
-            android:layout_gravity="bottom"
+            android:layout_width="0dp"
+            android:layout_height="70dp"
             android:orientation="horizontal"
-            android:weightSum="3">
+            android:weightSum="3"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/translated_text">
 
             <Button
                 android:id="@+id/home_button"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/green"
                 android:onClick="@{()-> viewModel.onHomeButtonClick()}"
                 android:text="@string/back_to_home"
                 android:textColor="@android:color/white"
-                android:textSize="15sp" />
+                android:textSize="17sp" />
 
             <Button
                 android:id="@+id/other_question_button"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/deep_green"
                 android:onClick="@{()-> viewModel.onQuestionButtonClick()}"
                 android:text="@string/another_question"
                 android:textColor="@android:color/white"
-                android:textSize="15sp" />
+                android:textSize="17sp" />
 
             <Button
                 android:id="@+id/sign_language_button"
                 android:layout_width="0dp"
-                android:layout_height="100dp"
+                android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/green"
                 android:onClick="@{()-> viewModel.onSignLanguageButtonClick()}"
                 android:text="@string/sign_language"
                 android:textColor="@android:color/white"
-                android:textSize="15sp" />
+                android:textSize="17sp" />
         </LinearLayout>
-    </androidx.coordinatorlayout.widget.CoordinatorLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </layout>
