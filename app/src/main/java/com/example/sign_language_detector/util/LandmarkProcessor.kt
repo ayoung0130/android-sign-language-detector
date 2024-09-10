@@ -1,10 +1,8 @@
 package com.example.sign_language_detector.util
 
 import android.util.Log
-import android.widget.Toast
 import com.example.sign_language_detector.repository.HandLandmarkerHelper
 import com.example.sign_language_detector.repository.PoseLandmarkerHelper
-import com.google.mediapipe.tasks.vision.handlandmarker.HandLandmarkerResult
 import kotlin.math.acos
 import kotlin.math.sqrt
 
