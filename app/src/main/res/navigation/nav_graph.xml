@@ -8,7 +8,7 @@
     <!-- Splash Fragment -->
     <fragment
         android:id="@+id/splash_fragment"
-        android:name="com.example.sign_language_detector.ui.splash.SplashFragment"
+        android:name="com.ayeong.sign_language_detector.ui.splash.SplashFragment"
         android:label="SplashFragment">
 
         <action
@@ -22,7 +22,7 @@
     <!-- Home Fragment -->
     <fragment
         android:id="@+id/home_fragment"
-        android:name="com.example.sign_language_detector.ui.home.HomeFragment"
+        android:name="com.ayeong.sign_language_detector.ui.home.HomeFragment"
         android:label="HomeFragment">
 
         <action
@@ -37,7 +37,7 @@
     <!-- Camera Fragment -->
     <fragment
         android:id="@+id/camera_fragment"
-        android:name="com.example.sign_language_detector.ui.camera.CameraFragment"
+        android:name="com.ayeong.sign_language_detector.ui.camera.CameraFragment"
         android:label="CameraFragment">
 
         <action
@@ -69,7 +69,7 @@
     <!-- Questions Fragment -->
     <fragment
         android:id="@+id/questions_fragment"
-        android:name="com.example.sign_language_detector.ui.questions.QuestionsFragment"
+        android:name="com.ayeong.sign_language_detector.ui.questions.QuestionsFragment"
         android:label="QuestionsFragment">
 
         <action
@@ -83,7 +83,7 @@
     <!-- Sign Language Fragment -->
     <fragment
         android:id="@+id/sign_language_fragment"
-        android:name="com.example.sign_language_detector.ui.signlanguage.SignLanguageFragment"
+        android:name="com.ayeong.sign_language_detector.ui.signlanguage.SignLanguageFragment"
         android:label="SignLanguageFragment" >
         <action
             android:id="@+id/action_sign_language_to_camera"

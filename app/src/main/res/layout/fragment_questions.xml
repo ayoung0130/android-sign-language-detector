@@ -7,7 +7,7 @@
 
         <variable
             name="viewModel"
-            type="com.example.sign_language_detector.ui.questions.QuestionsViewModel" />
+            type="com.ayeong.sign_language_detector.ui.questions.QuestionsViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

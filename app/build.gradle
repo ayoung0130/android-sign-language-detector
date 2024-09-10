@@ -20,11 +20,11 @@ if (localPropertiesFile.exists()) {
 def openaiApiKey = localProperties.getProperty("OPENAI_API_KEY") ?: ""
 
 android {
-    namespace 'com.example.sign_language_detector'
+    namespace 'com.ayeong.sign_language_detector'
     compileSdk 34
 
     defaultConfig {
-        applicationId "com.example.sign_language_detector"
+        applicationId "com.ayeong.sign_language_detector"
         minSdk 27
         targetSdk 34
         versionCode 1

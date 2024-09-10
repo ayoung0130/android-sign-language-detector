@@ -5,7 +5,7 @@
 
         <variable
             name="signLanguageItem"
-            type="com.example.sign_language_detector.ui.signlanguage.SignLanguageItem" />
+            type="com.ayeong.sign_language_detector.ui.signlanguage.SignLanguageItem" />
     </data>
 
     <androidx.cardview.widget.CardView
