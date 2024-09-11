@@ -32,15 +32,10 @@ class HandLandmarkerHelper(
         setupHandLandmarker()
     }
 
-    // HandLandmarkerHelper의 실행 상태를 반환
-    fun isClose(): Boolean {
-        return handLandmarker == null
-    }
-
     // 현재 설정을 사용하여 Hand landmarker를 초기화
     // CPU는 메인 스레드에서 생성되고 백그라운드 스레드에서 사용되는 Landmarker와 함께 사용할 수 있지만,
     // GPU 대리자는 Landmarker를 초기화한 스레드에서 사용해야 함
-    fun setupHandLandmarker() {
+    private fun setupHandLandmarker() {
         // 일반적인 hand landmarker 옵션 설정
         val baseOptionBuilder = BaseOptions.builder()
 
@@ -67,9 +62,7 @@ class HandLandmarkerHelper(
                 }
             }
 
-            else -> {
-                // no-op
-            }
+            else -> { }
         }
 
         try {
@@ -88,24 +81,16 @@ class HandLandmarkerHelper(
             if (runningMode == RunningMode.LIVE_STREAM) {
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
-                    .setErrorListener(this::returnLivestreamError)
             }
 
             val options = optionsBuilder.build()
             handLandmarker =
                 HandLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-            handLandmarkerHelperListener?.onHandError(
-                "Hand Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요."
-            )
             Log.e(
                 TAG, "MediaPipe가 오류로 인해 태스크를 로드하지 못했습니다: " + e.message
             )
         } catch (e: RuntimeException) {
-            // GPU를 지원하지 않는 모델을 사용할 때 발생합니다.
-            handLandmarkerHelperListener?.onHandError(
-                "Hand Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요.", GPU_ERROR
-            )
             Log.e(
                 TAG,
                 "이미지 분류기가 모델 로드에 실패했습니다: " + e.message
@@ -181,13 +166,6 @@ class HandLandmarkerHelper(
         )
     }
 
-    // 이 HandLandmarkerHelper의 호출자에게 감지 중 발생한 오류 반환
-    private fun returnLivestreamError(error: RuntimeException) {
-        handLandmarkerHelperListener?.onHandError(
-            error.message ?: "알 수 없는 오류가 발생했습니다"
-        )
-    }
-
     data class ResultBundle(
         val results: List<HandLandmarkerResult>,
         val inputImageHeight: Int,
@@ -195,7 +173,6 @@ class HandLandmarkerHelper(
     )
 
     interface LandmarkerListener {
-        fun onHandError(error: String, errorCode: Int = OTHER_ERROR)
         fun onHandResults(resultBundle: ResultBundle)
     }
 
@@ -209,7 +186,5 @@ class HandLandmarkerHelper(
         const val DEFAULT_HAND_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_HAND_PRESENCE_CONFIDENCE = 0.5F
         const val DEFAULT_NUM_HANDS = 2
-        const val OTHER_ERROR = 0
-        const val GPU_ERROR = 1
     }
 }

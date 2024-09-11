@@ -47,7 +47,7 @@
             android:id="@+id/action_camera_to_questions"
             app:destination="@id/questions_fragment" />
         <action
-            android:id="@+id/action_camera_to_sign_language"
+            android:id="@+id/action_camera_to_sign_language_video"
             app:destination="@id/sign_language_video_fragment" />
 
         <!-- Questions에서 Camera로 이동 (뒤로 가기) -->

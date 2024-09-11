@@ -31,11 +31,7 @@ class PoseLandmarkerHelper(
         setupPoseLandmarker()
     }
 
-    fun isClose(): Boolean {
-        return poseLandmarker == null
-    }
-
-    fun setupPoseLandmarker() {
+    private fun setupPoseLandmarker() {
         val baseOptionBuilder = BaseOptions.builder()
 
         when (currentDelegate) {
@@ -59,9 +55,7 @@ class PoseLandmarkerHelper(
                 }
             }
 
-            else -> {
-                // no-op
-            }
+            else -> { }
         }
 
         try {
@@ -76,20 +70,13 @@ class PoseLandmarkerHelper(
             if (runningMode == RunningMode.LIVE_STREAM) {
                 optionsBuilder
                     .setResultListener(this::returnLivestreamResult)
-                    .setErrorListener(this::returnLivestreamError)
             }
 
             val options = optionsBuilder.build()
             poseLandmarker = PoseLandmarker.createFromOptions(context, options)
         } catch (e: IllegalStateException) {
-            poseLandmarkerHelperListener?.onPoseError(
-                "Pose Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요."
-            )
             Log.e(TAG, "MediaPipe가 오류로 인해 태스크를 로드하지 못했습니다: " + e.message)
         } catch (e: RuntimeException) {
-            poseLandmarkerHelperListener?.onPoseError(
-                "Pose Landmarker 초기화에 실패했습니다. 오류 로그를 참조하세요.", GPU_ERROR
-            )
             Log.e(TAG, "이미지 분류기가 모델 로드에 실패했습니다: " + e.message)
         }
     }
@@ -147,12 +134,6 @@ class PoseLandmarkerHelper(
         )
     }
 
-    private fun returnLivestreamError(error: RuntimeException) {
-        poseLandmarkerHelperListener?.onPoseError(
-            error.message ?: "알 수 없는 오류가 발생했습니다"
-        )
-    }
-
     companion object {
         const val TAG = "PoseLandmarkerHelper"
         private const val MP_POSE_LANDMARKER_TASK = "pose_landmarker_lite.task"
@@ -173,7 +154,6 @@ class PoseLandmarkerHelper(
     )
 
     interface LandmarkerListener {
-        fun onPoseError(error: String, errorCode: Int = OTHER_ERROR)
         fun onPoseResults(resultBundle: ResultBundle)
     }
 }

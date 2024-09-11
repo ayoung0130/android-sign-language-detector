@@ -25,7 +25,7 @@ class CameraViewModel(
 
     var navigateToHome: (() -> Unit)? = null
     var navigateToQuestions: (() -> Unit)? = null
-    var navigateToSignLanguage: (() -> Unit)? = null
+    var navigateToSignLanguageVideo: (() -> Unit)? = null
     var navigateBack: (() -> Unit)? = null
 
     fun onHomeButtonClick() {
@@ -37,7 +37,7 @@ class CameraViewModel(
     }
 
     fun onSignLanguageVideoButtonClick() {
-        navigateToSignLanguage?.invoke()
+        navigateToSignLanguageVideo?.invoke()
     }
 
     fun onBackButtonClick() {
@@ -84,7 +84,7 @@ class CameraViewModel(
     fun processWords(words: MutableList<String>) {
         viewModelScope.launch {
             // words 리스트를 한 줄로 표시
-            _words.postValue("모델 예측 결과: " + words.joinToString(" "))
+            _words.postValue("모델 예측 결과: " + words.joinToString(", "))
 
             // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
             val finalResult = processAndGenerateSentence(words)
