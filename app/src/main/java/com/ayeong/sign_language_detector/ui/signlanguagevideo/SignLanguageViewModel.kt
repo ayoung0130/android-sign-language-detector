@@ -1,4 +1,4 @@
-package com.ayeong.sign_language_detector.ui.signlanguage
+package com.ayeong.sign_language_detector.ui.signlanguagevideo
 
 import android.content.Context
 import androidx.lifecycle.LiveData

@@ -4,8 +4,8 @@
     <data>
 
         <variable
-            name="signLanguageItem"
-            type="com.ayeong.sign_language_detector.ui.signlanguage.SignLanguageItem" />
+            name="signLanguageVideoItem"
+            type="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageItem" />
     </data>
 
     <androidx.cardview.widget.CardView
@@ -24,7 +24,7 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="5dp"
                 android:gravity="center"
-                android:text="@{signLanguageItem.actionName}"
+                android:text="@{signLanguageVideoItem.actionName}"
                 android:textSize="22sp"
                 android:textStyle="bold"
                 app:layout_constraintEnd_toEndOf="parent"

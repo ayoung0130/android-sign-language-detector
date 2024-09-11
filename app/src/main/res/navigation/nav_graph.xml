@@ -48,7 +48,7 @@
             app:destination="@id/questions_fragment" />
         <action
             android:id="@+id/action_camera_to_sign_language"
-            app:destination="@id/sign_language_fragment" />
+            app:destination="@id/sign_language_video_fragment" />
 
         <!-- Questions에서 Camera로 이동 (뒤로 가기) -->
         <action
@@ -80,10 +80,10 @@
     </fragment>
 
 
-    <!-- Sign Language Fragment -->
+    <!-- Sign Language Video Fragment -->
     <fragment
-        android:id="@+id/sign_language_fragment"
-        android:name="com.ayeong.sign_language_detector.ui.signlanguage.SignLanguageFragment"
+        android:id="@+id/sign_language_video_fragment"
+        android:name="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageFragment"
         android:label="SignLanguageFragment" >
         <action
             android:id="@+id/action_sign_language_to_camera"

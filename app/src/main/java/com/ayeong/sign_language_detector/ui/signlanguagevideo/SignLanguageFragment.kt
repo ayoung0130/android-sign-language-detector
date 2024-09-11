@@ -1,4 +1,4 @@
-package com.ayeong.sign_language_detector.ui.signlanguage
+package com.ayeong.sign_language_detector.ui.signlanguagevideo
 
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -7,18 +7,18 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.ayeong.sign_language_detector.databinding.FragmentSignLanguageBinding
+import com.ayeong.sign_language_detector.databinding.FragmentSignLanguageVideoBinding
 
 class SignLanguageFragment : Fragment() {
 
-    private lateinit var binding: FragmentSignLanguageBinding
+    private lateinit var binding: FragmentSignLanguageVideoBinding
     private val viewModel: SignLanguageViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentSignLanguageBinding.inflate(inflater, container, false)
+        binding = FragmentSignLanguageVideoBinding.inflate(inflater, container, false)
         binding.viewModel = viewModel
         binding.lifecycleOwner = viewLifecycleOwner
 

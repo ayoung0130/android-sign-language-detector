@@ -1,4 +1,4 @@
-package com.ayeong.sign_language_detector.ui.signlanguage
+package com.ayeong.sign_language_detector.ui.signlanguagevideo
 
 import android.media.MediaMetadataRetriever
 import android.view.LayoutInflater
@@ -7,14 +7,14 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.DiffUtil
 import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.ayeong.sign_language_detector.databinding.ItemSignLanguageBinding
+import com.ayeong.sign_language_detector.databinding.ItemSignLanguageVideoBinding
 
 class SignLanguageAdapter :
     ListAdapter<SignLanguageItem, SignLanguageAdapter.SignLanguageViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SignLanguageViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
-        val binding = ItemSignLanguageBinding.inflate(layoutInflater, parent, false)
+        val binding = ItemSignLanguageVideoBinding.inflate(layoutInflater, parent, false)
         return SignLanguageViewHolder(binding)
     }
 
@@ -23,11 +23,11 @@ class SignLanguageAdapter :
         holder.bind(signLanguageItem)
     }
 
-    class SignLanguageViewHolder(private val binding: ItemSignLanguageBinding) :
+    class SignLanguageViewHolder(private val binding: ItemSignLanguageVideoBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         fun bind(signLanguageItem: SignLanguageItem) {
-            binding.signLanguageItem = signLanguageItem
+            binding.signLanguageVideoItem = signLanguageItem
 
             // MediaMetadataRetriever를 사용하여 동영상의 특정 프레임을 미리보기로 표시
             val retriever = MediaMetadataRetriever()
