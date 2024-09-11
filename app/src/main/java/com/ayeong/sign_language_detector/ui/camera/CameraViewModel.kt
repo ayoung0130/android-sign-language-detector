@@ -36,7 +36,7 @@ class CameraViewModel(
         navigateToQuestions?.invoke()
     }
 
-    fun onSignLanguageButtonClick() {
+    fun onSignLanguageVideoButtonClick() {
         navigateToSignLanguage?.invoke()
     }
 

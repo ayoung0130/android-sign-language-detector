@@ -153,7 +153,7 @@
                 android:layout_height="match_parent"
                 android:layout_weight="1"
                 android:backgroundTint="@color/green"
-                android:onClick="@{()-> viewModel.onSignLanguageButtonClick()}"
+                android:onClick="@{()-> viewModel.onSignLanguageVideoButtonClick()}"
                 android:text="@string/sign_language"
                 android:textColor="@android:color/white"
                 android:textSize="17sp" />

@@ -36,15 +36,12 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     PoseLandmarkerHelper.LandmarkerListener {
 
     private var _fragmentCameraBinding: FragmentCameraBinding? = null
-    private val fragmentCameraBinding
-        get() = _fragmentCameraBinding!!
+    private val fragmentCameraBinding get() = _fragmentCameraBinding!!
 
     private lateinit var viewModel: CameraViewModel
     private lateinit var handLandmarkerHelper: HandLandmarkerHelper
     private lateinit var poseLandmarkerHelper: PoseLandmarkerHelper
 
-    private var imageHandAnalyzer: ImageAnalysis? = null
-    private var imagePoseAnalyzer: ImageAnalysis? = null
     private var cameraProvider: ProcessCameraProvider? = null
     private var cameraFacing = CameraSelector.LENS_FACING_FRONT
 
@@ -58,35 +55,12 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
 
-    override fun onResume() {
-        super.onResume()
-        // 모든 권한이 여전히 존재하는지 확인, 사용자가 앱이 일시 중지된 동안 이를 제거할 수 있음
-        if (!SplashFragment.hasPermissions(requireContext())) {
-            Navigation.findNavController(
-                requireActivity(), R.id.fragment_container
-            ).navigate(R.id.action_splash_to_home)
-        }
-
-        // 사용자가 전면으로 돌아올 때 HandLandmarkerHelper를 다시 시작
-        backgroundExecutor.execute {
-            if (handLandmarkerHelper.isClose()) {
-                handLandmarkerHelper.setupHandLandmarker()
-            }
-            if (poseLandmarkerHelper.isClose()) {
-                poseLandmarkerHelper.setupPoseLandmarker()
-            }
-        }
-    }
-
     override fun onDestroyView() {
         _fragmentCameraBinding = null
         super.onDestroyView()
 
         // 백그라운드 실행기 종료
         backgroundExecutor.shutdown()
-        backgroundExecutor.awaitTermination(
-            Long.MAX_VALUE, TimeUnit.NANOSECONDS
-        )
     }
 
     override fun onCreateView(
@@ -103,7 +77,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-
         // 백그라운드 실행기 초기화
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
@@ -198,14 +171,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         )
     }
 
-    override fun onConfigurationChanged(newConfig: Configuration) {
-        super.onConfigurationChanged(newConfig)
-        imageHandAnalyzer?.targetRotation =
-            fragmentCameraBinding.viewFinder.display.rotation
-        imagePoseAnalyzer?.targetRotation =
-            fragmentCameraBinding.viewFinder.display.rotation
-    }
-
     // 손이 감지된 후 UI 업데이트. 오리지널 이미지 높이/너비를 추출하고 캔버스를 통해 랜드마크를 올바르게 배치
     override fun onHandResults(resultBundle: HandLandmarkerHelper.ResultBundle) {
         activity?.runOnUiThread {
@@ -213,8 +178,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
                 // 필요한 정보를 OverlayView에 전달하여 캔버스에 그림
                 fragmentCameraBinding.overlay.setHandResults(
                     resultBundle.results.first(),
-                    resultBundle.inputImageHeight,  //640
-                    resultBundle.inputImageWidth,   //480
+                    resultBundle.inputImageHeight,
+                    resultBundle.inputImageWidth,
                     RunningMode.LIVE_STREAM
                 )
                 // 다시 그리기 강제
