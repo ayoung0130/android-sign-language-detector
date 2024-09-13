@@ -2,7 +2,9 @@ package com.ayeong.sign_language_detector.ui.questions
 
 import android.view.LayoutInflater
 import android.view.ViewGroup
+import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
+import com.ayeong.sign_language_detector.R
 import com.ayeong.sign_language_detector.databinding.ItemQuestionBinding
 
 class QuestionsAdapter(private val questions: List<String>) :
@@ -26,6 +28,12 @@ class QuestionsAdapter(private val questions: List<String>) :
         fun bind(question: String) {
             binding.question = question
             binding.executePendingBindings()
+
+            binding.questionText.setOnClickListener {
+                // NavController를 사용하여 CameraFragment로 이동
+                val navController = binding.root.findNavController()
+                navController.navigate(R.id.action_questions_to_camera)
+            }
         }
     }
 }
