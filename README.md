@@ -9,10 +9,8 @@
 ![image](https://github.com/user-attachments/assets/b325a622-8e3f-4fb1-bb42-4e8fd710eaf5)
 
 ## 스크린샷
-![image](https://github.com/user-attachments/assets/5df345cc-5947-4ecd-9231-c2b7e914b861)
-![image](https://github.com/user-attachments/assets/9ff5b0c5-3c56-4fcb-9afe-37c71bf6be25)
-![image](https://github.com/user-attachments/assets/8c022b48-f86f-404a-b789-366dc06d2973)
-![image](https://github.com/user-attachments/assets/d15898fe-c656-4a85-912b-f0f31651376a)
+![image](https://github.com/user-attachments/assets/b4a55210-cc9e-4cdd-af58-05c449c39572)
+![image](https://github.com/user-attachments/assets/b5a92c39-a2a7-4bde-bd85-3acce4556415)
 
 ### 실제 테스트 영상(Test ver.)
 https://www.youtube.com/watch?v=vtBtMZohcf0
