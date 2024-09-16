@@ -4,15 +4,17 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.activity.addCallback
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import com.ayeong.sign_language_detector.R
 import com.ayeong.sign_language_detector.databinding.FragmentSignLanguageVideoBinding
 
-class SignLanguageFragment : Fragment() {
+class SignLanguageVideoFragment : Fragment() {
 
     private lateinit var binding: FragmentSignLanguageVideoBinding
-    private val viewModel: SignLanguageViewModel by viewModels()
+    private val viewModel: SignLanguageVideoViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -24,7 +26,11 @@ class SignLanguageFragment : Fragment() {
 
         // ViewModel의 navigateBack 콜백 설정
         viewModel.navigateBack = {
-            findNavController().navigateUp()
+            findNavController().navigate(R.id.action_sign_language_to_camera)
+        }
+
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            findNavController().navigate(R.id.action_sign_language_to_camera)
         }
 
         return binding.root

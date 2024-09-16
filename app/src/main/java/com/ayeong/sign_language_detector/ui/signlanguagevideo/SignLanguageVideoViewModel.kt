@@ -5,14 +5,14 @@ import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 
-class SignLanguageViewModel : ViewModel() {
+class SignLanguageVideoViewModel : ViewModel() {
 
     private val _signLanguageItems = MutableLiveData<List<SignLanguageItem>>()
     val signLanguageItems: LiveData<List<SignLanguageItem>> = _signLanguageItems
 
     var navigateBack: (() -> Unit)? = null
 
-    val adapter = SignLanguageAdapter()
+    val adapter = SignLanguageVideoAdapter()
 
     fun loadSignLanguageItems(context: Context) {
         _signLanguageItems.value = SignLanguageList.getSignLanguageItems(context)

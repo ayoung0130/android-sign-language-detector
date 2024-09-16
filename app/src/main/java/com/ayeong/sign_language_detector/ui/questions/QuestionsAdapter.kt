@@ -29,10 +29,12 @@ class QuestionsAdapter(private val questions: List<String>) :
             binding.question = question
             binding.executePendingBindings()
 
-            binding.questionText.setOnClickListener {
-                // NavController를 사용하여 CameraFragment로 이동
+            binding.questionCard.setOnClickListener {
                 val navController = binding.root.findNavController()
-                navController.navigate(R.id.action_questions_to_camera)
+
+                // SafeArgs로 nullable 인수를 넘기는 메서드 사용
+                val action = QuestionsFragmentDirections.actionQuestionsToCamera(question)
+                navController.navigate(action)
             }
         }
     }

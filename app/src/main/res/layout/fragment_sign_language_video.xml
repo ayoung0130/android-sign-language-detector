@@ -6,7 +6,7 @@
 
         <variable
             name="viewModel"
-            type="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageViewModel" />
+            type="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageVideoViewModel" />
     </data>
 
     <androidx.constraintlayout.widget.ConstraintLayout

@@ -40,6 +40,12 @@
         android:name="com.ayeong.sign_language_detector.ui.camera.CameraFragment"
         android:label="CameraFragment">
 
+        <argument
+            android:name="selectedQuestion"
+            app:argType="string"
+            app:nullable="true"
+            android:defaultValue="@null" /> <!-- defaultValue를 null로 설정 -->
+
         <action
             android:id="@+id/action_camera_to_home"
             app:destination="@id/home_fragment" />
@@ -50,19 +56,6 @@
             android:id="@+id/action_camera_to_sign_language_video"
             app:destination="@id/sign_language_video_fragment" />
 
-        <!-- Questions에서 Camera로 이동 (뒤로 가기) -->
-        <action
-            android:id="@+id/action_questions_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
-
-        <!-- Sign Language에서 Camera로 이동 (뒤로 가기) -->
-        <action
-            android:id="@+id/action_sign_language_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
     </fragment>
 
 
@@ -74,21 +67,17 @@
 
         <action
             android:id="@+id/action_questions_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/camera_fragment" />
     </fragment>
 
 
     <!-- Sign Language Video Fragment -->
     <fragment
         android:id="@+id/sign_language_video_fragment"
-        android:name="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageFragment"
+        android:name="com.ayeong.sign_language_detector.ui.signlanguagevideo.SignLanguageVideoFragment"
         android:label="SignLanguageFragment" >
         <action
             android:id="@+id/action_sign_language_to_camera"
-            app:destination="@id/camera_fragment"
-            app:popUpTo="@id/camera_fragment"
-            app:popUpToInclusive="true" />
+            app:destination="@id/camera_fragment" />
     </fragment>
 </navigation>

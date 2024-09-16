@@ -9,8 +9,8 @@ import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
 import com.ayeong.sign_language_detector.databinding.ItemSignLanguageVideoBinding
 
-class SignLanguageAdapter :
-    ListAdapter<SignLanguageItem, SignLanguageAdapter.SignLanguageViewHolder>(DIFF_CALLBACK) {
+class SignLanguageVideoAdapter :
+    ListAdapter<SignLanguageItem, SignLanguageVideoAdapter.SignLanguageViewHolder>(DIFF_CALLBACK) {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): SignLanguageViewHolder {
         val layoutInflater = LayoutInflater.from(parent.context)
