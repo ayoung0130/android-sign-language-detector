@@ -4,6 +4,7 @@ plugins {
     id 'de.undercouch.download'
     id 'com.google.dagger.hilt.android'
     id 'kotlin-kapt'
+    id 'androidx.navigation.safeargs.kotlin'  // SafeArgs 플러그인 적용
 }
 
 android.buildFeatures.buildConfig true
@@ -71,7 +72,7 @@ dependencies {
     implementation 'androidx.databinding:databinding-runtime:8.5.0'
 
     // Navigation library
-    def nav_version = "2.5.3"
+    def nav_version = "2.8.0"
     implementation "androidx.navigation:navigation-fragment-ktx:$nav_version"
     implementation "androidx.navigation:navigation-ui-ktx:$nav_version"
 

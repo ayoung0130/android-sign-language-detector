@@ -7,6 +7,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.addCallback
 import androidx.camera.core.CameraSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -49,6 +50,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private lateinit var backgroundExecutor: ExecutorService
 
     override fun onDestroyView() {
+        Log.d("tag", "onDestroyView")
         _binding = null
         super.onDestroyView()
 
@@ -61,8 +63,17 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
+        Log.d("tag", "onCreateView")
         _binding =
             FragmentCameraBinding.inflate(inflater, container, false)
+
+        // SafeArgs로 전달된 argument 받기, 기본값은 "수어 동작을 시작해주세요"
+        val selectedQuestion = arguments?.let {
+            CameraFragmentArgs.fromBundle(it).selectedQuestion
+        } ?: "수어 동작을 시작해주세요"
+
+        // question_text를 업데이트
+        binding.questionText.text = selectedQuestion
 
         return binding.root
     }
@@ -70,6 +81,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
+        Log.d("tag", "onViewCreated")
         // 백그라운드 실행기 초기화
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
@@ -102,17 +114,21 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
         // 뷰가 제대로 배치될 때까지 대기
         binding.viewFinder.post {
-            // 카메라와 그 사용 사례를 설정
             setUpCamera()
         }
 
         // 버튼 클릭에 따른 네비게이션 설정
         with(viewModel) {
-            navigateToHome = { findNavController().navigateUp() }
+            navigateToHome = { findNavController().navigate(R.id.action_camera_to_home) }
             navigateToQuestions = { findNavController().navigate(R.id.action_camera_to_questions) }
             navigateToSignLanguageVideo =
                 { findNavController().navigate(R.id.action_camera_to_sign_language_video) }
-            navigateBack = { findNavController().navigateUp() }
+            navigateBack = { viewModel.navigateToHome?.invoke() }
+        }
+
+        // 뒤로 가기 버튼이 눌렸을 때 항상 home_fragment로 이동
+        requireActivity().onBackPressedDispatcher.addCallback(viewLifecycleOwner) {
+            viewModel.navigateToHome?.invoke()
         }
     }
 
