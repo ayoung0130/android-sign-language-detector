@@ -13,8 +13,7 @@
     <string name="check_symptom">증상 확인</string>
     <string name="diagnosis_examination">진단 및 검사</string>
 
-    <string name="sample_question">어디가 아파서 오셨어요?</string>
-    <string name="no_question">수어 동작을 시작하세요.</string>
+    <string name="no_question">수어 동작을 시작하세요</string>
     <string name="predict">머리가 너무 아파요.\n열도 나요.</string>
     <string name="back_to_home">홈으로</string>
     <string name="another_question">다른 질문\n선택</string>
