@@ -50,7 +50,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private lateinit var backgroundExecutor: ExecutorService
 
     override fun onDestroyView() {
-        Log.d("tag", "onDestroyView")
         _binding = null
         super.onDestroyView()
 
@@ -63,7 +62,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        Log.d("tag", "onCreateView")
         _binding =
             FragmentCameraBinding.inflate(inflater, container, false)
 
@@ -81,7 +79,6 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     @SuppressLint("MissingPermission")
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
-        Log.d("tag", "onViewCreated")
         // 백그라운드 실행기 초기화
         backgroundExecutor = Executors.newSingleThreadExecutor()
 
@@ -223,7 +220,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
 
             } else if (storedLandmarkData.size > 5) {
                 // 데이터가 존재하지만, maxHandMissingFrames 이상 시퀀스 길이 이하일 때
-                Toast.makeText(context, "동작을 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context, "동작을 조금 더 길게 수행해주세요", Toast.LENGTH_SHORT).show()
             }
 
             // 데이터가 클리어될 때 카운터도 리셋

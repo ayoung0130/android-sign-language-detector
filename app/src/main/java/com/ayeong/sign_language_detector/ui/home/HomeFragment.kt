@@ -54,7 +54,7 @@ class HomeFragment : Fragment() {
         // 첫 번째 뒤로 가기 클릭
         if (currentTime - backPressedTime > 2000) {
             backPressedTime = currentTime
-            Toast.makeText(context, "뒤로가기 버튼을 한번 더 누르면 종료됩니다", Toast.LENGTH_SHORT).show()
+            Toast.makeText(context, "뒤로 버튼을 한번 더 누르시면 종료됩니다", Toast.LENGTH_SHORT).show()
         } else {
             // 두 번째 뒤로 가기 클릭 -> 앱 종료
             requireActivity().finish()
