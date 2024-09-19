@@ -23,18 +23,14 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
             ActivityResultContracts.RequestPermission()
         ) { isGranted: Boolean ->
             if (isGranted) {
-                Toast.makeText(
-                    context,
-                    "카메라 권한이 허용되었습니다",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "카메라 권한이 허용되었습니다", Toast.LENGTH_SHORT).show()
                 navigateToHome()
             } else {
-                Toast.makeText(
-                    context,
-                    "카메라 권한이 거부되었습니다",
-                    Toast.LENGTH_SHORT
-                ).show()
+                Toast.makeText(context, "카메라 권한이 거부되었습니다", Toast.LENGTH_SHORT).show()
+                Handler(Looper.getMainLooper()).postDelayed({
+                    navigateToHome()
+                    Toast.makeText(context, "실시간 수어 통역 기능을 이용하시려면 설정에서 카메라 권한을 허용해주세요", Toast.LENGTH_LONG).show()
+                }, 1500)
             }
         }
 
@@ -42,10 +38,10 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
         super.onCreate(savedInstanceState)
 
         if (hasPermissions(requireContext())) {
-            // 권한이 이미 있는 경우 1.5초 후 HomeFragment로 이동
+            // 권한이 이미 있는 경우 1초 후 HomeFragment로 이동
             Handler(Looper.getMainLooper()).postDelayed({
                 navigateToHome()
-            }, 1500)
+            }, 1000)
         } else {
             // 권한이 없는 경우 권한을 요청
             requestPermissionLauncher.launch(
@@ -61,7 +57,6 @@ class SplashFragment : Fragment(R.layout.fragment_splash) {
     }
 
     companion object {
-        /** Convenience method used to check if all permissions required by this app are granted */
         fun hasPermissions(context: Context) = PERMISSIONS_REQUIRED.all {
             ContextCompat.checkSelfPermission(
                 context,
