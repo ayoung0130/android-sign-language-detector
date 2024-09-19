@@ -39,7 +39,7 @@
                 android:id="@+id/question_text"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="18sp"
+                android:textSize="20sp"
                 android:textStyle="bold"
                 app:layout_constraintBottom_toBottomOf="parent"
                 app:layout_constraintEnd_toEndOf="parent"
@@ -66,7 +66,7 @@
             app:layout_constraintStart_toStartOf="@id/view_finder"
             app:layout_constraintTop_toTopOf="@id/view_finder" />
 
-        <!-- 카메라 화면 위에 놓인 원형 램프 이미지 -->
+        <!-- 카메라 화면 위 원형 램프 이미지 -->
         <ImageView
             android:id="@+id/lamp_image"
             android:layout_width="20dp"
