@@ -14,6 +14,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.ViewModelProvider
 import androidx.navigation.fragment.findNavController
+import com.ayeong.sign_language_detector.Constants
 import com.ayeong.sign_language_detector.R
 import com.ayeong.sign_language_detector.databinding.FragmentCameraBinding
 import com.ayeong.sign_language_detector.repository.HandLandmarkerHelper
@@ -212,7 +213,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             Log.d("tag", "storedData size: ${storedLandmarkData.size}")
 
         } else if (storedLandmarkData.isNotEmpty()) {   // 손이 화면에서 사라지고, 데이터가 존재하면
-            if (storedLandmarkData.size > 15) {
+            if (storedLandmarkData.size > Constants.SLICING_WINDOW) {
                 Log.d("tag", "손 내려감! 예측 수행")
 
                 val predictedWords = viewModel.modelPredict(storedLandmarkData)
