@@ -3,7 +3,9 @@ package com.ayeong.sign_language_detector.util
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
+import android.graphics.DashPathEffect
 import android.graphics.Paint
+import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -26,40 +28,46 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
+    private var guideLinePaint = Paint()
 
     init {
         initPaints()
     }
 
     private fun initPaints() {
+        // 랜드마크 연결 선
         linePaint.color = ContextCompat.getColor(context!!, R.color.mp_color_primary)
         linePaint.strokeWidth = LANDMARK_STROKE_WIDTH
         linePaint.style = Paint.Style.STROKE
 
+        // 랜드마크 점
         pointPaint.color = Color.YELLOW
         pointPaint.strokeWidth = LANDMARK_STROKE_WIDTH
         pointPaint.style = Paint.Style.FILL
     }
 
-    override fun draw(canvas: Canvas) {
-        super.draw(canvas)
+    override fun onDraw(canvas: Canvas) {
+        super.onDraw(canvas)
+
+        // 손 랜드마크 그리기
         handResults?.let { drawHandlandmark(it, canvas) }
+
+        // 포즈 랜드마크 그리기
         poseResults?.let { drawPoseLandmark(it, canvas) }
     }
 
     private fun drawHandlandmark(result: HandLandmarkerResult, canvas: Canvas) {
-        super.draw(canvas)
         result.let { handLandmarkerResult ->
             handLandmarkerResult.landmarks().forEachIndexed { index, landmark ->
                 val handedness = handLandmarkerResult.handedness()[index].first().categoryName()
-                // 왼손 -> GREEN, 오른손 -> YELLOW 로 고려
                 val lineColor = if (handedness == "Right") Color.GREEN else Color.YELLOW
-                val linePaint = Paint().apply {
+                val handLinePaint = Paint().apply {
                     color = lineColor
                     strokeWidth = LANDMARK_STROKE_WIDTH
                     style = Paint.Style.STROKE
                 }
 
+                // 손 랜드마크 그리기
                 for (normalizedLandmark in landmark) {
                     canvas.drawPoint(
                         normalizedLandmark.x() * imageWidth * scaleFactor,
@@ -68,17 +76,14 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                     )
                 }
 
+                // 손 연결 그리기
                 HandLandmarker.HAND_CONNECTIONS.forEach {
                     canvas.drawLine(
-                        landmark[it!!.start()]
-                            .x() * imageWidth * scaleFactor,
-                        landmark[it.start()]
-                            .y() * imageHeight * scaleFactor,
-                        landmark[it.end()]
-                            .x() * imageWidth * scaleFactor,
-                        landmark[it.end()]
-                            .y() * imageHeight * scaleFactor,
-                        linePaint
+                        landmark[it!!.start()].x() * imageWidth * scaleFactor,
+                        landmark[it.start()].y() * imageHeight * scaleFactor,
+                        landmark[it.end()].x() * imageWidth * scaleFactor,
+                        landmark[it.end()].y() * imageHeight * scaleFactor,
+                        handLinePaint
                     )
                 }
             }
@@ -86,7 +91,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     }
 
     private fun drawPoseLandmark(result: PoseLandmarkerResult, canvas: Canvas) {
-        super.draw(canvas)
         result.let { poseLandmarkerResult ->
             for (landmark in poseLandmarkerResult.landmarks()) {
                 for (normalizedLandmark in landmark) {
@@ -117,20 +121,9 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         runningMode: RunningMode = RunningMode.LIVE_STREAM
     ) {
         handResults = handLandmarkerResults
-
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth
-
-        scaleFactor = when (runningMode) {
-            RunningMode.IMAGE,
-            RunningMode.VIDEO -> {
-                min(width * 1f / imageWidth, height * 1f / imageHeight)
-            }
-
-            RunningMode.LIVE_STREAM -> {
-                max(width * 1f / imageWidth, height * 1f / imageHeight)
-            }
-        }
+        updateScaleFactor(runningMode)
         invalidate()
     }
 
@@ -141,10 +134,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         runningMode: RunningMode = RunningMode.LIVE_STREAM
     ) {
         poseResults = poseLandmarkerResults
-
         this.imageHeight = imageHeight
         this.imageWidth = imageWidth
+        updateScaleFactor(runningMode)
+        invalidate()
+    }
 
+    private fun updateScaleFactor(runningMode: RunningMode) {
         scaleFactor = when (runningMode) {
             RunningMode.IMAGE,
             RunningMode.VIDEO -> {
@@ -155,7 +151,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
                 max(width * 1f / imageWidth, height * 1f / imageHeight)
             }
         }
-        invalidate()
     }
 
     companion object {
