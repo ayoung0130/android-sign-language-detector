@@ -18,10 +18,11 @@
         <androidx.constraintlayout.widget.ConstraintLayout
             android:id="@+id/top_bar"
             android:layout_width="0dp"
-            android:layout_height="wrap_content"
+            android:layout_height="0dp"
             android:background="@color/light_beige"
             android:padding="16dp"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.08"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent">
 
@@ -54,6 +55,7 @@
             android:layout_height="0dp"
             app:layout_constraintBottom_toTopOf="@+id/translated_words"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.65"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/top_bar" />
 
@@ -98,7 +100,7 @@
         <TextView
             android:id="@+id/translated_words"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="0dp"
             android:background="#80000000"
             android:backgroundTint="@color/light_black"
             android:gravity="center"
@@ -108,6 +110,7 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/translated_text"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.08"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/view_finder" />
 
@@ -115,7 +118,7 @@
         <TextView
             android:id="@+id/translated_text"
             android:layout_width="0dp"
-            android:layout_height="50dp"
+            android:layout_height="0dp"
             android:background="#80000000"
             android:backgroundTint="@color/light_black"
             android:gravity="center"
@@ -125,6 +128,7 @@
             android:textStyle="bold"
             app:layout_constraintBottom_toTopOf="@id/bottom_bar"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.08"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/translated_words" />
 
@@ -132,11 +136,12 @@
         <LinearLayout
             android:id="@+id/bottom_bar"
             android:layout_width="0dp"
-            android:layout_height="80dp"
+            android:layout_height="0dp"
             android:orientation="horizontal"
             android:weightSum="3"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHeight_percent="0.11"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/translated_text">
 
@@ -149,7 +154,8 @@
                 android:onClick="@{()-> viewModel.onHomeButtonClick()}"
                 android:text="@string/back_to_home"
                 android:textColor="@android:color/white"
-                android:textSize="17sp" />
+                android:textSize="17sp"
+                app:cornerRadius="0dp" />
 
             <Button
                 android:id="@+id/other_question_button"
@@ -160,7 +166,8 @@
                 android:onClick="@{()-> viewModel.onQuestionButtonClick()}"
                 android:text="@string/another_question"
                 android:textColor="@android:color/white"
-                android:textSize="17sp" />
+                android:textSize="17sp"
+                app:cornerRadius="0dp" />
 
             <Button
                 android:id="@+id/sign_language_button"
@@ -171,7 +178,8 @@
                 android:onClick="@{()-> viewModel.onSignLanguageVideoButtonClick()}"
                 android:text="@string/sign_language"
                 android:textColor="@android:color/white"
-                android:textSize="17sp" />
+                android:textSize="17sp"
+                app:cornerRadius="0dp" />
         </LinearLayout>
 
     </androidx.constraintlayout.widget.ConstraintLayout>
