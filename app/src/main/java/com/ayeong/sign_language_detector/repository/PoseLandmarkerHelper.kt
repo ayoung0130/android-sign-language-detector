@@ -143,8 +143,6 @@ class PoseLandmarkerHelper(
         const val DEFAULT_POSE_DETECTION_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_TRACKING_CONFIDENCE = 0.5F
         const val DEFAULT_POSE_PRESENCE_CONFIDENCE = 0.5F
-        const val OTHER_ERROR = 0
-        const val GPU_ERROR = 1
     }
 
     data class ResultBundle(

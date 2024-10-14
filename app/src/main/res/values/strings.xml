@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">손말</string>
+    <string name="app_name">MediSign Bot: 의료기관용 수어 통역기</string>
 
     <string name="home_title_text">딥러닝을 활용한\n실시간 수어 통역기</string>
     <string name="home_choice_question">질문 선택하기</string>

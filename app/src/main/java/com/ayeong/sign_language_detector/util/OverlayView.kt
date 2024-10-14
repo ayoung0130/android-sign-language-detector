@@ -28,7 +28,6 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
     private var scaleFactor: Float = 1f
     private var imageWidth: Int = 1
     private var imageHeight: Int = 1
-    private var guideLinePaint = Paint()
 
     init {
         initPaints()
