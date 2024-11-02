@@ -96,8 +96,9 @@ class CameraViewModel(
     }
 
     private suspend fun processAndGenerateSentence(words: MutableList<String>): String? {
-        Log.d("tag", "단어 리스트: $words")
+        Log.d("tag", "예측 단어 리스트: $words")
         val result = wordsToSentence.llm(words)
+        Log.d("tag", "ChatGPT 문장 변환: $result")
         return result?.trim()
     }
 }

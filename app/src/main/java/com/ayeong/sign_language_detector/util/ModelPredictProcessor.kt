@@ -29,7 +29,7 @@ class ModelPredictProcessor(context: Context) {
 
     fun predict(data: List<FloatArray>): MutableList<String> {
         // 전체 시퀀스를 생성
-        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 3)
+        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 5)
 
         // TFLite 모델에 입력할 배열 준비
         val inputArray = Array(inputSequences.size) { index ->
@@ -52,8 +52,30 @@ class ModelPredictProcessor(context: Context) {
         }
         Log.d("ModelPredictProcessor", "predictions: $predictions")
 
-        // 예측된 인덱스를 해당하는 단어로 변환하여 반환
-        return predictions.map { index -> Constants.ACTIONS[index] }.toMutableList()
+        // 세 번 이상 연속으로 반복된 단어만 필터링
+        val filteredPredictions = mutableListOf<String>()
+        var currentWord: Int? = null
+        var count = 0
+
+        for (prediction in predictions) {
+            if (prediction == currentWord) {
+                count++
+            } else {
+                if (count >= 3 && currentWord != null) {
+                    filteredPredictions.add(Constants.ACTIONS[currentWord])
+                }
+                currentWord = prediction
+                count = 1
+            }
+        }
+        // 마지막 단어에 대한 처리
+        if (count >= 3 && currentWord != null) {
+            filteredPredictions.add(Constants.ACTIONS[currentWord])
+        }
+
+        Log.d("ModelPredictProcessor", "filteredPredictions: $filteredPredictions")
+
+        return filteredPredictions
     }
 
     private fun createSequences(
