@@ -84,21 +84,26 @@ class CameraViewModel(
     fun processWords(words: MutableList<String>) {
         viewModelScope.launch {
             // words 리스트를 한 줄로 표시
-            _words.postValue("모델 예측 결과: " + words.joinToString(", "))
+            _words.postValue("동작한 수어 단어: " + words.joinToString(", "))
 
             // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
             val finalResult = processAndGenerateSentence(words)
             if (finalResult != null) {
                 processTts.speak(finalResult)
             }
-            _predict.postValue("GPT: $finalResult") // 최종 결과만 LiveData에 설정
+            _predict.postValue("문장: $finalResult") // 최종 결과만 LiveData에 설정
         }
     }
 
     private suspend fun processAndGenerateSentence(words: MutableList<String>): String? {
         Log.d("tag", "예측 단어 리스트: $words")
-        val result = wordsToSentence.llm(words)
-        Log.d("tag", "ChatGPT 문장 변환: $result")
-        return result?.trim()
+        return if (words.isEmpty()) {
+            val result = "다시 한 번 동작해주세요"
+            result.trim()
+        } else {
+            val result = wordsToSentence.llm(words)
+            Log.d("tag", "ChatGPT 문장 변환: $result")
+            result?.trim()
+        }
     }
 }

@@ -29,7 +29,7 @@ class ModelPredictProcessor(context: Context) {
 
     fun predict(data: List<FloatArray>): MutableList<String> {
         // 전체 시퀀스를 생성
-        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 5)
+        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 1)
 
         // TFLite 모델에 입력할 배열 준비
         val inputArray = Array(inputSequences.size) { index ->

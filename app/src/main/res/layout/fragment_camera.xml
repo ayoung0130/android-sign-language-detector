@@ -68,20 +68,20 @@
             app:layout_constraintStart_toStartOf="@id/view_finder"
             app:layout_constraintTop_toTopOf="@id/view_finder" />
 
-        <!-- 가이드선 이미지 (점선 형태의 상체 이미지) -->
-        <ImageView
-            android:id="@+id/guide_overlay"
-            android:layout_width="270dp"
-            android:layout_height="0dp"
-            android:layout_marginTop="20dp"
-            android:background="@android:color/transparent"
-            android:contentDescription="@string/guide_line"
-            android:scaleType="fitXY"
-            android:src="@drawable/guide_line"
-            app:layout_constraintBottom_toTopOf="@+id/translated_words"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/lamp_image" />
+<!--        &lt;!&ndash; 가이드선 이미지 (점선 형태의 상체 이미지) &ndash;&gt;-->
+<!--        <ImageView-->
+<!--            android:id="@+id/guide_overlay"-->
+<!--            android:layout_width="270dp"-->
+<!--            android:layout_height="0dp"-->
+<!--            android:layout_marginTop="20dp"-->
+<!--            android:background="@android:color/transparent"-->
+<!--            android:contentDescription="@string/guide_line"-->
+<!--            android:scaleType="fitXY"-->
+<!--            android:src="@drawable/guide_line"-->
+<!--            app:layout_constraintBottom_toTopOf="@+id/translated_words"-->
+<!--            app:layout_constraintEnd_toEndOf="parent"-->
+<!--            app:layout_constraintStart_toStartOf="parent"-->
+<!--            app:layout_constraintTop_toBottomOf="@+id/lamp_image" />-->
 
         <!-- 카메라 화면 위 원형 램프 이미지 -->
         <ImageView

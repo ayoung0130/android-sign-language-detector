@@ -20,6 +20,7 @@
     <string name="sign_language">수어 동작\n보기</string>
 
     <string name="sign_language_list">학습된 수어 목록</string>
-    <string name="play">재생</string>
+    <string name="replay">다시 재생</string>
+    <string name="close">닫기</string>
     <string name="guide_line">GuideLine</string>
 </resources>
