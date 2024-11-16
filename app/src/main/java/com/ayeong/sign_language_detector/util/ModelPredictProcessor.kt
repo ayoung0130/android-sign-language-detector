@@ -12,7 +12,7 @@ class ModelPredictProcessor(context: Context) {
     private val tflite: Interpreter
 
     init {
-        val model = loadModelFile(context, "sign_language_detect_model.tflite")
+        val model = loadModelFile(context, "sign_language_detect_model_1113.tflite")
         tflite = Interpreter(model)
     }
 
@@ -27,9 +27,9 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<FloatArray>): MutableList<String> {
+    fun predict(data: List<FloatArray>): Pair<MutableList<String>, MutableList<String>> {
         // 전체 시퀀스를 생성
-        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 1)
+        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, Constants.JUMPING_WINDOW)
 
         // TFLite 모델에 입력할 배열 준비
         val inputArray = Array(inputSequences.size) { index ->
@@ -47,13 +47,16 @@ class ModelPredictProcessor(context: Context) {
 
         // 예측 결과 처리
         val predictions = mutableListOf<Int>()
+        val predictionWords = mutableListOf<String>()
         for (output in outputArray) {
             predictions.add(output.indexOfMax())
+            predictionWords.add(Constants.ACTIONS[output.indexOfMax()])
         }
-        Log.d("ModelPredictProcessor", "predictions: $predictions")
+
+        Log.d("ModelPredictProcessor", "predicted words: $predictionWords")
 
         // 세 번 이상 연속으로 반복된 단어만 필터링
-        val filteredPredictions = mutableListOf<String>()
+        val filteredWords = mutableListOf<String>()
         var currentWord: Int? = null
         var count = 0
 
@@ -62,7 +65,7 @@ class ModelPredictProcessor(context: Context) {
                 count++
             } else {
                 if (count >= 3 && currentWord != null) {
-                    filteredPredictions.add(Constants.ACTIONS[currentWord])
+                    filteredWords.add(Constants.ACTIONS[currentWord])
                 }
                 currentWord = prediction
                 count = 1
@@ -70,12 +73,12 @@ class ModelPredictProcessor(context: Context) {
         }
         // 마지막 단어에 대한 처리
         if (count >= 3 && currentWord != null) {
-            filteredPredictions.add(Constants.ACTIONS[currentWord])
+            filteredWords.add(Constants.ACTIONS[currentWord])
         }
 
-        Log.d("ModelPredictProcessor", "filteredPredictions: $filteredPredictions")
+        Log.d("ModelPredictProcessor", "filtered words: $filteredWords")
 
-        return filteredPredictions
+        return Pair(predictionWords, filteredWords)
     }
 
     private fun createSequences(

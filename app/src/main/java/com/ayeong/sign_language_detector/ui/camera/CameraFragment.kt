@@ -216,8 +216,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             if (storedLandmarkData.size > Constants.SLICING_WINDOW) {
                 Log.d("tag", "손 내려감! 예측 수행")
 
-                val predictedWords = viewModel.modelPredict(storedLandmarkData)
-                viewModel.processWords(predictedWords)
+                val (predictedWords, filteredWords) = viewModel.modelPredict(storedLandmarkData)
+                viewModel.processWords(predictedWords, filteredWords)
 
             } else if (storedLandmarkData.size > 5) {
                 // 데이터가 존재하지만, maxHandMissingFrames 이상 시퀀스 길이 이하일 때

@@ -77,17 +77,17 @@ class CameraViewModel(
         return landmarkProcessor.processLandmarks(handResultBundle, poseResultBundle)
     }
 
-    fun modelPredict(data: List<FloatArray>): MutableList<String> {
+    fun modelPredict(data: List<FloatArray>): Pair<MutableList<String>, MutableList<String>> {
         return modelPredictProcessor.predict(data)
     }
 
-    fun processWords(words: MutableList<String>) {
+    fun processWords(predictedWords: MutableList<String>, filteredWords: MutableList<String>) {
         viewModelScope.launch {
             // words 리스트를 한 줄로 표시
-            _words.postValue("동작한 수어 단어: " + words.joinToString(", "))
+            _words.postValue("동작한 수어 단어: " + filteredWords.joinToString(", "))
 
             // 최종 결과를 받기 전까지는 _predict를 업데이트하지 않음
-            val finalResult = processAndGenerateSentence(words)
+            val finalResult = processAndGenerateSentence(filteredWords)
             if (finalResult != null) {
                 processTts.speak(finalResult)
             }
