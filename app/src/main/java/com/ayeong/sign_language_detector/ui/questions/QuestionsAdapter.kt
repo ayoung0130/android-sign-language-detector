@@ -4,7 +4,6 @@ import android.view.LayoutInflater
 import android.view.ViewGroup
 import androidx.navigation.findNavController
 import androidx.recyclerview.widget.RecyclerView
-import com.ayeong.sign_language_detector.R
 import com.ayeong.sign_language_detector.databinding.ItemQuestionBinding
 
 class QuestionsAdapter(private val questions: List<String>) :
