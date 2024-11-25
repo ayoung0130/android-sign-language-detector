@@ -12,7 +12,7 @@ class ModelPredictProcessor(context: Context) {
     private val tflite: Interpreter
 
     init {
-        val model = loadModelFile(context, "sign_language_detect_model_1125.tflite")
+        val model = loadModelFile(context, "sign_language_detect_model.tflite")
         tflite = Interpreter(model)
     }
 
@@ -27,7 +27,7 @@ class ModelPredictProcessor(context: Context) {
         return byteBuffer
     }
 
-    fun predict(data: List<FloatArray>): Pair<MutableList<String>, MutableList<String>> {
+    fun predict(data: List<FloatArray>): String {
         // 전체 시퀀스를 생성
         val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 5)
 
@@ -45,40 +45,14 @@ class ModelPredictProcessor(context: Context) {
             Log.d("ModelPredictProcessor", "outputArray[$index]: ${output.contentToString()}")
         }
 
+        var predictionWord = ""
         // 예측 결과 처리
-        val predictions = mutableListOf<Int>()
-        val predictionWords = mutableListOf<String>()
         for (output in outputArray) {
-            predictions.add(output.indexOfMax())
-            predictionWords.add(Constants.ACTIONS[output.indexOfMax()])
+            predictionWord = Constants.ACTIONS[output.indexOfMax()]
+            Log.d("ModelPredictProcessor", "predicted words: $predictionWord")
         }
 
-        Log.d("ModelPredictProcessor", "predicted words: $predictionWords")
-
-        // 세 번 이상 연속으로 반복된 단어만 필터링
-        val filteredWords = mutableListOf<String>()
-        var currentWord: Int? = null
-        var count = 0
-
-        for (prediction in predictions) {
-            if (prediction == currentWord) {
-                count++
-            } else {
-                if (count >= 3 && currentWord != null) {
-                    filteredWords.add(Constants.ACTIONS[currentWord])
-                }
-                currentWord = prediction
-                count = 1
-            }
-        }
-        // 마지막 단어에 대한 처리
-        if (count >= 3 && currentWord != null) {
-            filteredWords.add(Constants.ACTIONS[currentWord])
-        }
-
-        Log.d("ModelPredictProcessor", "filtered words: $filteredWords")
-
-        return Pair(predictionWords, filteredWords)
+        return predictionWord
     }
 
     private fun createSequences(
@@ -91,14 +65,12 @@ class ModelPredictProcessor(context: Context) {
         val sequences = mutableListOf<List<FloatArray>>()
         for (i in 0..data.size - slicingWindow step jumpingWindow) {
             val sequence = data.subList(i, i + slicingWindow)
-            Log.d("ModelPredictProcessor", "window: $i, ${i + slicingWindow}")
             sequences.add(sequence)
 
             // 배열의 내용을 출력하도록 수정
             val sequenceContent = sequence.joinToString(", ") { it.contentToString() }
             Log.d("ModelPredictProcessor", "Sequence: $sequenceContent")
         }
-
         Log.d("ModelPredictProcessor", "Sequence data size: ${sequences.size}")
 
         return sequences

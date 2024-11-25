@@ -8,6 +8,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.addCallback
+import androidx.camera.camera2.internal.compat.workaround.MaxPreviewSize
 import androidx.camera.core.CameraSelector
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
@@ -46,6 +47,8 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
     private var poseResultBundle: PoseLandmarkerHelper.ResultBundle? = null
 
     private val storedLandmarkData = mutableListOf<FloatArray>()
+    private val predictedWords = mutableListOf<String>()
+    private val answerWords = mutableListOf<String>()
 
     /** 차단된 ML 작업은 이 실행기를 사용하여 수행 */
     private lateinit var backgroundExecutor: ExecutorService
@@ -212,12 +215,27 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             storedLandmarkData.add(processedLandmarks)
             Log.d("tag", "storedData size: ${storedLandmarkData.size}")
 
+            if (storedLandmarkData.size == Constants.SLICING_WINDOW) {
+                val predictedWord = viewModel.modelPredict(storedLandmarkData)
+                predictedWords.add(predictedWord)
+
+                // 연속으로 3개 단어가 같은지 확인
+                if (predictedWords.size >= 3) {
+                    val lastThreeWords = predictedWords.takeLast(3)
+                    if (lastThreeWords.all { it == lastThreeWords[0] }) {
+                        answerWords.add(lastThreeWords[0])  // 정답 리스트에 추가
+                        viewModel.processWords(answerWords, false)
+                        predictedWords.clear() // 정답 처리 후 리스트 초기화
+                    }
+                }
+                storedLandmarkData.subList(0, 5).clear()  // 처음 5개 요소 제거
+            }
+
         } else if (storedLandmarkData.isNotEmpty()) {   // 손이 화면에서 사라지고, 데이터가 존재하면
-            if (storedLandmarkData.size > Constants.SLICING_WINDOW) {
+            if (storedLandmarkData.size >= Constants.SLICING_WINDOW - 5) {
                 Log.d("tag", "손 내려감! 예측 수행")
 
-                val (predictedWords, filteredWords) = viewModel.modelPredict(storedLandmarkData)
-                viewModel.processWords(predictedWords, filteredWords)
+                viewModel.processWords(answerWords, true)
 
             } else if (storedLandmarkData.size > 5) {
                 // 데이터가 존재하지만, maxHandMissingFrames 이상 시퀀스 길이 이하일 때
@@ -227,6 +245,7 @@ class CameraFragment : Fragment(), HandLandmarkerHelper.LandmarkerListener,
             // 데이터가 클리어될 때 카운터도 리셋
             viewModel.onBothDetected(false)
             storedLandmarkData.clear()
+            answerWords.clear()
         }
     }
 
