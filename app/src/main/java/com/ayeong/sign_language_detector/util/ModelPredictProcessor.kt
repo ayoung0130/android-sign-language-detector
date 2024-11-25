@@ -12,7 +12,7 @@ class ModelPredictProcessor(context: Context) {
     private val tflite: Interpreter
 
     init {
-        val model = loadModelFile(context, "sign_language_detect_model_1113.tflite")
+        val model = loadModelFile(context, "sign_language_detect_model_1125.tflite")
         tflite = Interpreter(model)
     }
 
@@ -29,7 +29,7 @@ class ModelPredictProcessor(context: Context) {
 
     fun predict(data: List<FloatArray>): Pair<MutableList<String>, MutableList<String>> {
         // 전체 시퀀스를 생성
-        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, Constants.JUMPING_WINDOW)
+        val inputSequences = createSequences(data, Constants.SLICING_WINDOW, 5)
 
         // TFLite 모델에 입력할 배열 준비
         val inputArray = Array(inputSequences.size) { index ->
