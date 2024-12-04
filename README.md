@@ -2,21 +2,21 @@
 
 
 ## Flow Chart
-<img src="images/app_flow_chart.png" alt="app_flow_chart" width="300"/>
+<img src="images/app_flow_chart.png" alt="app_flow_chart" width="500"/>
 
 
 ## UI
 <p align="center">
-  <img src="images/screen_0.jpg" alt="App UI 1" width="100"/>
-  <img src="images/screen_1.jpg" alt="App UI 2" width="100"/>
-  <img src="images/screen_2.jpg" alt="App UI 3" width="100"/>
-  <img src="images/screen_3.png" alt="App UI 4" width="100"/>
-  <img src="images/screen_4.jpg" alt="App UI 5" width="100"/>
+  <img src="images/screen_0.jpg" alt="App UI 1" width="150"/>
+  <img src="images/screen_1.jpg" alt="App UI 2" width="150"/>
+  <img src="images/screen_2.jpg" alt="App UI 3" width="150"/>
+  <img src="images/screen_3.png" alt="App UI 4" width="150"/>
+  <img src="images/screen_4.jpg" alt="App UI 5" width="150"/>
 </p>
 
 
 ## 전체 시스템 구조
-<img src="images/system_architecture.png" alt="system_architecture" width="300"/>
+<img src="images/system_architecture.png" alt="system_architecture" width="500"/>
 
 - sign-language-detect-model
 1) Google의 MediaPipe를 활용하여 손과 포즈 랜드마크의 3차원 좌푯값 추출
@@ -30,7 +30,7 @@
 
 
 ## 데이터 구조
-<img src="images/data_structure.png" alt="data_structure" width="300"/>
+<img src="images/data_structure.png" alt="data_structure" width="500"/>
 - 손의 21개의 랜드마크와 포즈의 21개의 랜드마크 좌푯값 추출
 - arccos 함수를 이용해 각 관절 사이의 각도를 계산
 - 좌푯값과 각도값을 합한 총 234개의 피처에 레이블을 추가해 총 235개의 피처를 2차원 배열 형태로 매 프레임마다 추출
@@ -38,7 +38,7 @@
 
 
 ## 모델 예측 및 문장 생성 알고리즘
-<img src="images/model_predict_sentence.png" alt="model_predict_sentence" width="300"/>
+<img src="images/model_predict_sentence.png" alt="model_predict_sentence" width="500"/>
 - 모델을 통해 예측된 단어를 예측 리스트에 추가
 - 3번 이상 같은 단어를 예측했다면 정답인 것으로 간주
 - ChatGPT API를 활용해 자연스러운 문장으로 변환
