@@ -23,7 +23,7 @@
 2) 각 관절 사이의 각도 값을 계산하여 생성한 2차원 데이터를 시퀀스(시계열) 데이터로 변환 후 LSTM 레이어를 통한 수어 단어 학습
 3) 촬영한 테스트 데이터를 바탕으로 모델 평가
 
-- *android-sign-language-detector*
+- <u>android-sign-language-detector</u>
 4) LSTM 모델을 TensorFlow Lite로 변환하여 Android 환경에 포팅
 5) 모델을 통해 인식된 수어를 ChatGPT API를 통하여 자연스러운 문장으로 변환
 6) TTS(Text to Speech)로 의료진에게 음성으로 전달
