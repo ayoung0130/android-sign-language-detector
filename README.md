@@ -1,4 +1,4 @@
-## 의료기관용 수어 통역 애플리케이션
+# 의료기관용 수어 통역 애플리케이션
 
 
 ## Flow Chart
@@ -7,11 +7,11 @@
 
 ## UI
 <p align="center">
-  <img src="images/screen_0.png" alt="App UI 1" width="200"/>
-  <img src="images/screen_1.png" alt="App UI 2" width="200"/>
-  <img src="images/screen_2.png" alt="App UI 3" width="200"/>
+  <img src="images/screen_0.jpg" alt="App UI 1" width="200"/>
+  <img src="images/screen_1.jpg" alt="App UI 2" width="200"/>
+  <img src="images/screen_2.jpg" alt="App UI 3" width="200"/>
   <img src="images/screen_3.png" alt="App UI 4" width="200"/>
-  <img src="images/screen_4.png" alt="App UI 5" width="200"/>
+  <img src="images/screen_4.jpg" alt="App UI 5" width="200"/>
 </p>
 
 
