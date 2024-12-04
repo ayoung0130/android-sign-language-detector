@@ -1,19 +1,21 @@
 ## 의료기관용 수어 통역 애플리케이션
 
 
-### Flow Chart
+## Flow Chart
 ![flow chart](images/app_flow_chart.png)
 
 
-### UI
-![screen 0](images/screen_0.jpg)
-![screen 0](images/screen_1.jpg)
-![screen 0](images/screen_2.jpg)
-![screen 0](images/screen_3.png)
-![screen 0](images/screen_4.jpg)
+## UI
+<p align="center">
+  <img src="images/screen_0.png" alt="App UI 1" width="200"/>
+  <img src="images/screen_1.png" alt="App UI 2" width="200"/>
+  <img src="images/screen_2.png" alt="App UI 3" width="200"/>
+  <img src="images/screen_3.png" alt="App UI 4" width="200"/>
+  <img src="images/screen_4.png" alt="App UI 5" width="200"/>
+</p>
 
 
-### 전체 시스템 구조
+## 전체 시스템 구조
 ![system architecture](images/system_architecture.png)
 
 - sign-language-detect-model
@@ -27,7 +29,7 @@
 6) TTS(Text to Speech)로 의료진에게 음성으로 전달
 
 
-### 데이터 구조
+## 데이터 구조
 ![data structure](images/data_structure.png)
 - 손의 21개의 랜드마크와 포즈의 21개의 랜드마크 좌푯값 추출
 - arccos 함수를 이용해 각 관절 사이의 각도를 계산
@@ -35,12 +37,12 @@
 - 3차원 시퀀스 형태의 데이터로 변환
 
 
-### 모델 예측 및 문장 생성 알고리즘
+## 모델 예측 및 문장 생성 알고리즘
 ![model predict sentence](images/model_predict_sentence.png)
 - 모델을 통해 예측된 단어를 예측 리스트에 추가
 - 3번 이상 같은 단어를 예측했다면 정답인 것으로 간주
 - ChatGPT API를 활용해 자연스러운 문장으로 변환
 
 
-### 시연 영상
+## 시연 영상
 https://youtu.be/AGBR57R2nm8
