@@ -3,9 +3,7 @@ package com.ayeong.sign_language_detector.util
 import android.content.Context
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.DashPathEffect
 import android.graphics.Paint
-import android.graphics.Path
 import android.util.AttributeSet
 import android.view.View
 import androidx.core.content.ContextCompat
@@ -49,13 +47,13 @@ class OverlayView(context: Context?, attrs: AttributeSet?) : View(context, attrs
         super.onDraw(canvas)
 
         // 손 랜드마크 그리기
-        handResults?.let { drawHandlandmark(it, canvas) }
+        handResults?.let { drawHandLandmark(it, canvas) }
 
         // 포즈 랜드마크 그리기
         poseResults?.let { drawPoseLandmark(it, canvas) }
     }
 
-    private fun drawHandlandmark(result: HandLandmarkerResult, canvas: Canvas) {
+    private fun drawHandLandmark(result: HandLandmarkerResult, canvas: Canvas) {
         result.let { handLandmarkerResult ->
             handLandmarkerResult.landmarks().forEachIndexed { index, landmark ->
                 val handedness = handLandmarkerResult.handedness()[index].first().categoryName()
