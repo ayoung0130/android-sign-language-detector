@@ -1,5 +1,8 @@
 # 의료기관용 수어 통역 애플리케이션
 
+## Google Play - MediSign Bot: 의료기관용 수어 통역기
+https://play.google.com/store/apps/details?id=com.ayeong.sign_language_detector
+
 
 ## Flow Chart
 <img src="images/app_flow_chart.png" alt="app_flow_chart" width="600"/>
